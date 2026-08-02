@@ -2,7 +2,29 @@
 
 > Cloud-native Financial Data Platform for Analytics and Machine Learning
 
-![Project Status]
+## 🚧 Project Status
+
+Current Sprint: Sprint 1 – Data Modeling
+
+Completed
+
+- Repository Bootstrap
+- Architecture Planning
+- Initial Documentation
+
+In Progress
+
+- Business Requirements
+- Data Dictionary
+- Source System Design
+
+Upcoming
+
+- Warehouse Modeling
+- Python Ingestion
+- Airflow
+- dbt
+
 ![Python]
 ![Docker]
 ![Airflow]
@@ -30,25 +52,26 @@
 
 ---
 
-### 1. Overview
+## 1. Overview
 
-FinFlow is a cloud-native financial data platform. It transforms millions of daily financial transactions. It solves data team to enrich financial data.
+FinFlow is a production-inspired cloud-native financial data platform that ingests, validates, transforms, and serves financial data for analytics and machine learning. It demonstrates modern data engineering practices by combining Python, PostgreSQL, Apache Airflow, dbt, BigQuery, and Docker into an end-to-end ELT pipeline.
 
-### 2. Business Scenario
+## 2. Business Scenario
 
 A digital bank receives millions of daily transactions from multiple operational systems. Business analysts require reliable, trusted, and timely data to monitor merchant performance, customer behavior, and financial trends. Data scientists also need historical, high-quality datasets for machine learning models such as credit risk scoring and recommendation systems. FinFlow can solve these pain points.
 
-### 3. Project Objectives
+## 3. Project Objectives
 
-> Build a modern cloud-native data platform
-> Support batch ingestion from multiple sources
-> Ensure data quality
-> Design an analytics warehouse
-> Provide executive dashboards
-> Enable downstream ML workloads
+- Build a cloud-native data platform.
+- Ingest data from multiple financial sources.
+- Ensure data quality through validation.
+- Design a scalable analytical warehouse.
+- Provide executive dashboards.
+- Enable downstream machine learning workflows.
 
-### 4. System Architecture
+## 4. System Architecture
 
+``` Architecture
 External Sources
         │
         ▼
@@ -75,7 +98,9 @@ Analytics Mart
    ├── Looker Studio
    └── ML Feature Tables
 
-### 5. Technology Stack
+```
+
+## 5. Technology Stack
 
 | Category         | Technology           | Why               |
 | ---------------- | -------------------- | ----------------- |
@@ -90,8 +115,9 @@ Analytics Mart
 | Version Control  | Git/GitHub           | Collaboration     |
 
 
-### 6. Data Pipeline
+## 6. Data Pipeline
 
+``` Data Pipeline
 Extract
 ↓
 
@@ -117,7 +143,9 @@ Warehouse
 
 Dashboard
 
-### 7. Data Model
+```
+
+## 7. Data Model
 
 Source Systems
 - Transactions
@@ -125,16 +153,18 @@ Source Systems
 - Merchants
 - Exchange Rates
 
-### 8. Repository Structure
+## 8. Repository Structure
 
-ingestion/
-airflow/
-dbt/
-warehouse/
-docs/
-docker/
+```repo structure
+ingestion/   - Python ingestion services
+airflow/     - DAG definitions
+dbt/         - SQL transformations
+warehouse/   - Database schema
+docs/        - Architecture documentation
+docker/      - Container configuration
+```
 
-### 9. Development Roadmap
+## 9. Development Roadmap
 
 | Sprint                   | Status |
 | ------------------------ | ------ |
@@ -146,7 +176,7 @@ docker/
 | Sprint 5 — Dashboard     | ⏳      |
 
 
-### 10. Getting Started
+## 10. Getting Started
 
 git clone ...
 
@@ -154,7 +184,7 @@ uv sync
 
 docker compose up
 
-### 11. Documentation
+## 11. Documentation
 
 Architecture Decisions:
 /docs/adr/001-platform-architecture.md
@@ -163,15 +193,15 @@ Business Requirements:
 /docs/architecture/business-requirements.md
 
 Source Systems:
-/docs/architecture/data-dictionary.md
+/docs/architecture/source-systems.md
 
 Data Dictionary:
-/docs/architecture/source-systems.md
+/docs/architecture/data-dictionary.md
 
 ER Diagram:
 /docs/diagrams/erd.drawio
 
-### 12. Future Enhancements
+## 12. Future Enhancements
 
 - Kafka streaming ingestion
 - Terraform infrastructure
@@ -181,14 +211,10 @@ ER Diagram:
 - Apache Iceberg
 - CI/CD deployment
 
-### 13. Lessons Learned
+## 13. Lessons Learned
 
 I learned why raw data should remain immutable.
 
-### 14. License
+## 14. License
 
-MIT.
-
-Simple.
-
-Professional.
+This project is licensed under the MIT License. See the LICENSE file for details.
