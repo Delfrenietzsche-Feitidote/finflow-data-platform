@@ -120,10 +120,10 @@ Dashboard
 ### 7. Data Model
 
 Source Systems
-> Transactions
-> Customers
-> Merchants
-> Exchange Rates
+- Transactions
+- Customers
+- Merchants
+- Exchange Rates
 
 ### 8. Repository Structure
 
@@ -157,14 +157,19 @@ docker compose up
 ### 11. Documentation
 
 Architecture Decisions:
+/docs/adr/001-platform-architecture.md
 
 Business Requirements:
+/docs/architecture/business-requirements.md
 
 Source Systems:
+/docs/architecture/data-dictionary.md
 
 Data Dictionary:
+/docs/architecture/source-systems.md
 
 ER Diagram:
+/docs/diagrams/erd.drawio
 
 ### 12. Future Enhancements
 
