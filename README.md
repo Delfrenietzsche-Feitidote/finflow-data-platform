@@ -46,9 +46,11 @@ Upcoming
 9. Development Roadmap
 10. Getting Started
 11. Documentation
-12. Future Enhancements
-13. Lessons Learned
-14. License
+12. Features
+13. Future Enhancements
+14. Lessons Learned
+15. License
+16. Engineering Principles
 
 ---
 
@@ -71,7 +73,7 @@ A digital bank receives millions of daily transactions from multiple operational
 
 ## 4. System Architecture
 
-``` Architecture
+```text
 External Sources
         │
         ▼
@@ -117,7 +119,7 @@ Analytics Mart
 
 ## 6. Data Pipeline
 
-``` Data Pipeline
+```text
 Extract
 ↓
 
@@ -155,13 +157,15 @@ Source Systems
 
 ## 8. Repository Structure
 
-```repo structure
-ingestion/   - Python ingestion services
-airflow/     - DAG definitions
-dbt/         - SQL transformations
-warehouse/   - Database schema
-docs/        - Architecture documentation
-docker/      - Container configuration
+```text
+finflow-data-platform/
+├── ingestion/     # Python ingestion services
+├── airflow/       # DAG definitions
+├── dbt/           # ELT transformations
+├── warehouse/     # Database schema and SQL
+├── docs/          # Documentation
+├── docker/        # Docker configuration
+└── tests/         # Unit & integration tests
 ```
 
 ## 9. Development Roadmap
@@ -178,11 +182,15 @@ docker/      - Container configuration
 
 ## 10. Getting Started
 
-git clone ...
+```bash
+git clone https://github.com/yourusername/finflow-data-platform.git
+
+cd finflow-data-platform
 
 uv sync
 
 docker compose up
+```
 
 ## 11. Documentation
 
@@ -201,7 +209,17 @@ Data Dictionary:
 ER Diagram:
 /docs/diagrams/erd.drawio
 
-## 12. Future Enhancements
+## 12. Features
+
+- Multi-source financial data ingestion
+- Automated workflow orchestration
+- Data quality validation
+- Cloud-native ELT pipeline
+- Star schema data warehouse
+- Executive analytics dashboards
+- Machine learning feature tables
+
+## 13. Future Enhancements
 
 - Kafka streaming ingestion
 - Terraform infrastructure
@@ -211,10 +229,23 @@ ER Diagram:
 - Apache Iceberg
 - CI/CD deployment
 
-## 13. Lessons Learned
+## 14. Lessons Learned
 
 I learned why raw data should remain immutable.
 
-## 14. License
+## 15. License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
+
+## 16. Engineering Principles
+
+This project follows modern data engineering best practices:
+
+- Separation of concerns
+- Immutable raw data
+- Idempotent data pipelines
+- ELT over ETL
+- Infrastructure as Code (planned)
+- Version-controlled transformations
+- Automated testing
+- Documentation-first development
