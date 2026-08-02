@@ -1,12 +1,22 @@
+# Business Requirements
 
-Problem
+## Problem
 
-Objectives
+There are challenges of track financial transactions from various data sources which lose opportunities.
 
-Stakeholders
+## Objectives
 
-KPIs
+Create an all-in-one financial data platform updates daily
 
-Scope
+## Stakeholders
 
-Out of Scope
+- Merchants
+- Customers
+
+## KPIs
+
+
+
+## Scope
+
+## Out of Scope
