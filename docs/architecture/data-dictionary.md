@@ -1,18 +1,30 @@
 
-Transactions
+# Transactions
 
-transaction_id
+## transaction_id
 
-customer_id
+- An unique id of transactions
 
-merchant_id
+## customer_id
 
-currency
+- An unique id of customers that make the transaction
 
-amount
+## merchant_id
 
-timestamp
+- An unique id of merchants or financial institutions that make the transaction
 
-status
+## currency
 
-...
+- Currency of that transaction
+
+## amount
+
+- Amount money of that transaction
+
+## timestamp
+
+- Time of that transaction
+
+## status
+
+- The status of that transaction
