@@ -168,13 +168,13 @@ ER Diagram:
 
 ### 12. Future Enhancements
 
-> Kafka streaming ingestion
-> Terraform infrastructure
-> Kubernetes deployment
-> Data lineage with OpenLineage
-> Monitoring with Prometheus
-> Apache Iceberg
-> CI/CD deployment
+- Kafka streaming ingestion
+- Terraform infrastructure
+- Kubernetes deployment
+- Data lineage with OpenLineage
+- Monitoring with Prometheus
+- Apache Iceberg
+- CI/CD deployment
 
 ### 13. Lessons Learned
 
