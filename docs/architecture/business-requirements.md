@@ -15,7 +15,8 @@ Create an all-in-one financial data platform updates daily
 
 ## KPIs
 
-
+- Platform operate daily
+- Data completeness
 
 ## Scope
 
