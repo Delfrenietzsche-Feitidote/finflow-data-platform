@@ -1,1 +1,11 @@
-
+-- ==========================================================
+-- Table: dim_merchant
+-- Layer: Analytics Warehouse
+-- Purpose:
+-- Stores customer attributes for analytical reporting.
+--
+-- Grain:
+-- One row represents one version of one customer (SCD Type 2).
+--
+-- Author: Alize
+-- ==========================================================
