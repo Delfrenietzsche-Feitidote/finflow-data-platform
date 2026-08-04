@@ -10,8 +10,17 @@
 -- Author: Alize
 -- ==========================================================
 
-currency_key
-currency_code
-currency_name
-country
-country_code
+
+ CREATE TABLE warehouse.dim_currency (
+
+    currency_key BIGINT PRIMARY KEY,
+
+    currency_code VARCHAR(50) NOT NULL,
+
+    currency_name VARCHAR(255) NOT NULL,
+
+    country VARCHAR(100) NOT NULL,
+
+    country_code VARCHAR(20) NOT NULL,
+
+);
