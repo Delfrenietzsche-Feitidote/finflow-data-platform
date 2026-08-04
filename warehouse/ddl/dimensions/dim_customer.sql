@@ -5,20 +5,31 @@
 -- Stores customer attributes for analytical reporting.
 --
 -- Grain:
--- One row represents one version of one customer.
+-- One row represents one version of one customer (SCD Type 2).
 --
 -- Author: Alize
 -- ==========================================================
 
-CREATE TABLE warehouse.dim_customer (
-    customer_key,
-    customer_id,
-    customer_name,
-    customer_segment,
-    city,
-    country,
-    customer_status,
-    effective_date,
-    expiry_date,
-    is_current       
-)
+ CREATE TABLE warehouse.dim_customer (
+    
+    customer_key INT PRIMARY KEY,
+    
+    FOREIGN KEY(customer_id) REFERENCES fact_transactions(customer_id),
+    
+    customer_name VARCHAR(64) NOT NULL,
+    
+    customer_segment VARCHAR(10),
+    
+    city VARCHAR(64),
+    
+    country VATCHAR(64) NOT NULL,
+    
+    customer_status VARCHAR(64) NOT NULL,
+    
+    effective_date DATE,
+    
+    expiry_date DATE,
+    
+    is_current BOOLEAN NOT NULL
+    
+);
