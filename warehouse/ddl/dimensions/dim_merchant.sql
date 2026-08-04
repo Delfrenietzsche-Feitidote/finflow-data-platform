@@ -15,23 +15,23 @@ CREATE TABLE warehouse.dim_merchant (
   
   merchant_id INT KEY,
   
-  merchant_name ,
+  merchant_name VARCHAR(64) NOT NULL,
   
-  merchant_category ,
+  merchant_category VARCHAR(64) NOT NULL,
 
-  merchant_segment,
+  merchant_segment VARCHAR(64) NOT NULL,
 
-  city ,
+  city VARCHAR(64),
 
-  country , 
+  country VARCHAR(64) NOT NULL, 
 
-  merchant_status ,
+  merchant_status IN (ACTIVE, INACTIVE),
 
-  onboarding_date ,
+  onboarding_date DATE NOT NULL,
 
-  effective_date ,
+  effective_date  DATE NOT NULL,
 
-  expiry_date ,
+  expiry_date DATE NOT NULL,
 
-  is_current 
+  is_current BOOLEAN
 );
