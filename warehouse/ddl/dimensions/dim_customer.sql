@@ -12,9 +12,9 @@
 
  CREATE TABLE warehouse.dim_customer (
     
-    customer_key INT PRIMARY KEY,
+    FOREIGN KEY(customer_key) REFERENCES fact_transactions(customer_id),
     
-    FOREIGN KEY(customer_id) REFERENCES fact_transactions(customer_id),
+    customer_id INT PRIMARY KEY,
     
     customer_name VARCHAR(64) NOT NULL,
     
