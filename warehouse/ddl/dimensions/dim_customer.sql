@@ -1,5 +1,5 @@
 -- ==========================================================
--- Table: dim_customer
+-- Table: warehouse.dim_customer
 -- Layer: Analytics Warehouse
 -- Purpose:
 -- Stores customer attributes for analytical reporting.
