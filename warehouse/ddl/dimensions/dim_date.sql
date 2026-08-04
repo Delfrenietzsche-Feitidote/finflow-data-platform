@@ -1,4 +1,3 @@
-
 -- ==========================================================
 -- Table: warehouse.dim_date
 -- Layer: Analytics Warehouse
