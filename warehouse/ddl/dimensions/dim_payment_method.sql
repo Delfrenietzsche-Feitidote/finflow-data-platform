@@ -18,7 +18,7 @@ CREATE TABLE warehouse.dim_payment_method (
 
     payment_method_name VARCHAR(100) NOT NULL,
 
-    payment_type VARCHAR(50),
+    payment_type VARCHAR(30) NOT NULL,
 
     provider VARCHAR(100),
 
