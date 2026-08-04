@@ -20,7 +20,7 @@ CREATE TABLE warehouse.fact_transactions (
 
     merchant_key BIGINT NOT NULL REFERENCES warehouse.dim_merchant(merchant_key),
 
-    date_key BIGINT NOT NULL REFERENCES warehouse.dim_date(date_key),
+    date_key INT NOT NULL REFERENCES warehouse.dim_date(date_key),
 
     currency_key BIGINT NOT NULL REFERENCES warehouse.dim_currency(currency_key),
 
@@ -34,13 +34,21 @@ CREATE TABLE warehouse.fact_transactions (
 
     exchange_rate NUMERIC(18,2) NOT NULL,
 
-    amount_usd NUMERIC(18,2) NOT NULL
+    amount_usd NUMERIC(18,2) NOT NULL,
 
     batch_id VARCHAR(50) NOT NULL,
 
     source_system VARCHAR(100),
 
-    load_timestamp TIMESTAMP NOT NULL
+    load_timestamp TIMESTAMP NOT NULL,
+
+    CHECK (transaction_amount >= 0),
+
+    CHECK (transaction_fee >= 0),
+
+    CHECK (exchange_rate > 0),
+
+    CHECK (amount_usd >= 0)
 
 );
 
