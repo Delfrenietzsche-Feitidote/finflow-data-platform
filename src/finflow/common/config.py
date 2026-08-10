@@ -33,6 +33,18 @@ class PipelineSettings(BaseSettings):
         extra="ignore",
     )
 
+class StorageSettings(BaseSettings):
+    bucket_name: str
+    raw_path: str
+    staging_path: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="STORAGE_",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 db_settings = DatabaseSettings()
 pipeline_settings = PipelineSettings()
+storage_settings = StorageSettings()
