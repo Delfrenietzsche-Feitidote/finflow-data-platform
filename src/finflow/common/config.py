@@ -55,7 +55,32 @@ class LoggingSettings(BaseSettings):
         extra="ignore",
     )
 
-db_settings = DatabaseSettings()
-pipeline_settings = PipelineSettings()
-storage_settings = StorageSettings()
-logging_settings = LoggingSettings()
+class FinFlowSettings(BaseSettings):
+    database: DatabaseSettings
+    pipeline: PipelineSettings
+    storage: StorageSettings
+    logging: LoggingSettings
+
+settings = FinFlowSettings(
+    database=DatabaseSettings(),
+    pipeline=PipelineSettings(),
+    storage=StorageSettings(),
+    logging=LoggingSettings(),
+)
+
+from pydantic import BaseModel
+
+
+class FinFlowSettings(BaseModel):
+    database: DatabaseSettings
+    pipeline: PipelineSettings
+    storage: StorageSettings
+    logging: LoggingSettings
+
+
+settings = FinFlowSettings(
+    database=DatabaseSettings(),
+    pipeline=PipelineSettings(),
+    storage=StorageSettings(),
+    logging=LoggingSettings(),
+)
