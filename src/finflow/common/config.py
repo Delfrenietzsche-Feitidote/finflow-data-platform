@@ -45,6 +45,17 @@ class StorageSettings(BaseSettings):
         extra="ignore",
     )
 
+class LoggingSettings(BaseSettings):
+    log_level: str = Field(validation_alias="LOG_LEVEL")
+    log_format: str = Field(validation_alias="LOG_FORMAT")
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
 db_settings = DatabaseSettings()
 pipeline_settings = PipelineSettings()
 storage_settings = StorageSettings()
+logging_settings = LoggingSettings()
