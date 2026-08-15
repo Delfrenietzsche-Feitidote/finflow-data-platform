@@ -37,6 +37,7 @@ class StorageSettings(BaseSettings):
     bucket_name: str
     raw_path: str
     staging_path: str
+    rejected_path: str
 
     model_config = SettingsConfigDict(
         env_file=".env",
