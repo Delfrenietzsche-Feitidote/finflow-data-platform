@@ -4,10 +4,13 @@ from decimal import Decimal
 from finflow.ingestion.models.transaction import TransactionRecord
 
 
-def generate_transactions(count: int = 10) -> list[TransactionRecord]:
+def generate_transactions(
+    count: int = 10,
+    start_id: int = 1,
+) -> list[TransactionRecord]:
     transactions = []
 
-    for i in range(1, count + 1):
+    for i in range(start_id, start_id + count):
         transaction = TransactionRecord(
             transaction_id=f"TX{i:06d}",
             customer_id=f"C{i:04d}",
