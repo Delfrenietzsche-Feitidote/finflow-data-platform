@@ -8,6 +8,7 @@ def create_transaction(transaction_id: str) -> TransactionRecord:
     return TransactionRecord(
         transaction_id=transaction_id,
         customer_id="C001",
+        account_id="A001",
         merchant_id="M001",
         currency_code="THB",
         payment_method_code="CARD",

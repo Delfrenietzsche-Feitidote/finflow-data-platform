@@ -5,9 +5,10 @@ from finflow.ingestion.models.transaction import TransactionRecord
 
 
 INSERT_TRANSACTION = """
-INSERT INTO transactions (
+INSERT INTO staging.stg_transactions (
     transaction_id,
     customer_id,
+    account_id,
     merchant_id,
     currency_code,
     payment_method_code,
@@ -19,6 +20,7 @@ INSERT INTO transactions (
 VALUES (
     %(transaction_id)s,
     %(customer_id)s,
+    %(account_id)s,
     %(merchant_id)s,
     %(currency_code)s,
     %(payment_method_code)s,

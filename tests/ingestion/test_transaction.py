@@ -10,6 +10,7 @@ def test_valid_transaction():
     transaction = TransactionRecord(
         transaction_id="TX001",
         customer_id="C001",
+        account_id="A001",
         merchant_id="M001",
         currency_code="THB",
         payment_method_code="CARD",
@@ -20,6 +21,7 @@ def test_valid_transaction():
     )
 
     assert transaction.transaction_id == "TX001"
+    assert transaction.account_id == "A001"
     assert transaction.transaction_amount == Decimal("100.00")
 
 
@@ -28,6 +30,7 @@ def test_invalid_transaction_timestamp():
         TransactionRecord(
             transaction_id="TX001",
             customer_id="C001",
+            account_id="A001",
             merchant_id="M001",
             currency_code="THB",
             payment_method_code="CARD",

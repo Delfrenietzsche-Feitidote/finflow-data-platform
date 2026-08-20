@@ -14,6 +14,7 @@ def generate_transactions(
         transaction = TransactionRecord(
             transaction_id=f"TX{i:06d}",
             customer_id=f"C{i:04d}",
+            account_id=f"A{i:04d}",
             merchant_id=f"M{i:04d}",
             currency_code="THB",
             payment_method_code="CARD",

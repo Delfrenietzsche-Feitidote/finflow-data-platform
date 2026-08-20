@@ -13,6 +13,7 @@ def test_raw_writer(tmp_path):
         TransactionRecord(
             transaction_id="TX001",
             customer_id="C001",
+            account_id="A001",
             merchant_id="M001",
             currency_code="THB",
             payment_method_code="CARD",

@@ -1,7 +1,7 @@
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from datetime import date
-
+from pydantic import BaseModel
 
 class DatabaseSettings(BaseSettings):
     host: str
@@ -55,21 +55,6 @@ class LoggingSettings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
-
-class FinFlowSettings(BaseSettings):
-    database: DatabaseSettings
-    pipeline: PipelineSettings
-    storage: StorageSettings
-    logging: LoggingSettings
-
-settings = FinFlowSettings(
-    database=DatabaseSettings(),
-    pipeline=PipelineSettings(),
-    storage=StorageSettings(),
-    logging=LoggingSettings(),
-)
-
-from pydantic import BaseModel
 
 
 class FinFlowSettings(BaseModel):
