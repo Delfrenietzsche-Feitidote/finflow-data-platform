@@ -5,7 +5,6 @@ from finflow.ingestion.loaders.rejected_writer import write_rejected_transaction
 from finflow.ingestion.sources.transactions import generate_transactions
 from finflow.ingestion.validators.batch import validate_transactions
 from finflow.database.writer import write_transactions
-from finflow.transformation.transactions import transform_staging_transactions
 
 
 logger = get_logger(__name__)
@@ -49,12 +48,6 @@ def run_ingestion(
         database_written,
     )
 
-    core_written = transform_staging_transactions()
-
-    logger.info(
-        "Core transactions written: %s",
-        core_written,
-    )
 
     if rejected_transactions:
         write_rejected_transactions(
