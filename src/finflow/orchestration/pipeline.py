@@ -14,7 +14,7 @@ def run_pipeline(
 ) -> dict[str, int]:
     logger.info("FinFlow pipeline started")
 
-    run_ingestion(
+    ingestion_result = run_ingestion(
         count=count,
         start_id=start_id,
     )
@@ -41,6 +41,7 @@ def run_pipeline(
     )
 
     result = {
+        "ingested": ingestion_result,
         "core": core_written,
         "fact": fact_written,
         "metrics": metrics_written,

@@ -60,4 +60,7 @@ def run_ingestion(
             len(rejected_transactions),
         )
 
+    
     logger.info("Ingestion completed")
+
+    return database_written
