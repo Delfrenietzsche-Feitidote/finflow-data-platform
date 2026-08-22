@@ -98,10 +98,45 @@ CREATE TABLE IF NOT EXISTS core.transactions (
 );
 """
 
+ANALYTICS_FACT_TRANSACTIONS_TABLE = """
+CREATE TABLE IF NOT EXISTS analytics.fact_transactions (
+    transaction_id VARCHAR(100) PRIMARY KEY,
+
+    customer_id VARCHAR(100) NOT NULL,
+    account_id VARCHAR(100) NOT NULL,
+    merchant_id VARCHAR(100) NOT NULL,
+    payment_method_code VARCHAR(50) NOT NULL,
+
+    currency_code VARCHAR(10) NOT NULL,
+
+    transaction_timestamp TIMESTAMP NOT NULL,
+    transaction_date DATE NOT NULL,
+
+    transaction_amount NUMERIC(18, 2) NOT NULL,
+    transaction_fee NUMERIC(18, 2) NOT NULL,
+    exchange_rate NUMERIC(18, 6) NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
+DAILY_TRANSACTION_METRICS_TABLE = """
+CREATE TABLE IF NOT EXISTS analytics.daily_transaction_metrics (
+    transaction_date DATE PRIMARY KEY,
+    transaction_count INTEGER NOT NULL,
+    total_transaction_amount NUMERIC(18, 2) NOT NULL,
+    total_transaction_fee NUMERIC(18, 2) NOT NULL,
+    average_transaction_amount NUMERIC(18, 2) NOT NULL,
+    average_transaction_fee NUMERIC(18, 2) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
 def initialize_schema():
     with get_connection() as conn:
         with conn.cursor() as cursor:
             cursor.execute(CREATE_SCHEMAS)
+
             cursor.execute(STAGING_TRANSACTIONS_TABLE)
 
             cursor.execute(CORE_CUSTOMERS_TABLE)
@@ -110,4 +145,6 @@ def initialize_schema():
             cursor.execute(CORE_PAYMENT_METHODS_TABLE)
             cursor.execute(CORE_TRANSACTIONS_TABLE)
 
+            cursor.execute(ANALYTICS_FACT_TRANSACTIONS_TABLE)
+            cursor.execute(DAILY_TRANSACTION_METRICS_TABLE)
         conn.commit()
