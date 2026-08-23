@@ -1,3 +1,5 @@
+from datetime import date
+
 from finflow.common.config import settings
 from finflow.common.logging import get_logger
 from finflow.ingestion.loaders.raw_writer import write_raw_transactions
@@ -13,10 +15,15 @@ logger = get_logger(__name__)
 def run_ingestion(
     count: int = 10,
     start_id: int = 1,
+    batch_date: date | None = None,
 ) -> None:
     logger.info("Ingestion started")
 
-    transactions = generate_transactions(count, start_id=start_id)
+    transactions = generate_transactions(
+    count,
+    start_id=start_id,
+    batch_date=batch_date,
+)
 
     logger.info("Transactions extracted: %s", len(transactions))
 
@@ -30,7 +37,7 @@ def run_ingestion(
         len(rejected_transactions),
     )
 
-    batch_date = settings.pipeline.batch_date
+    batch_date = batch_date or settings.pipeline.batch_date
     raw_path = settings.storage.raw_path
     rejected_path = settings.storage.rejected_path
 
@@ -48,7 +55,6 @@ def run_ingestion(
         database_written,
     )
 
-
     if rejected_transactions:
         write_rejected_transactions(
             rejected_transactions,
@@ -60,7 +66,6 @@ def run_ingestion(
             len(rejected_transactions),
         )
 
-    
     logger.info("Ingestion completed")
 
     return database_written

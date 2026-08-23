@@ -3,7 +3,7 @@ from finflow.analytics.transactions import transform_core_transactions_to_fact
 from finflow.common.logging import get_logger
 from finflow.ingestion.pipeline import run_ingestion
 from finflow.transformation.transactions import transform_staging_transactions
-
+from datetime import date
 
 logger = get_logger(__name__)
 
@@ -11,13 +11,15 @@ logger = get_logger(__name__)
 def run_pipeline(
     count: int = 10,
     start_id: int = 1,
+    batch_date: date | None = None,
 ) -> dict[str, int]:
     logger.info("FinFlow pipeline started")
 
     ingestion_result = run_ingestion(
-        count=count,
-        start_id=start_id,
-    )
+    count=count,
+    start_id=start_id,
+    batch_date=batch_date,
+)
 
     core_written = transform_staging_transactions()
 
