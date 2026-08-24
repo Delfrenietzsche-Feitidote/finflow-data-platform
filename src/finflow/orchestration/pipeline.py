@@ -55,3 +55,45 @@ def run_pipeline(
     )
 
     return result
+
+def run_ingestion_task(
+    count: int = 10,
+    start_id: int = 1,
+) -> int:
+    return run_ingestion(
+        count=count,
+        start_id=start_id,
+    )
+
+
+def run_core_transformation() -> int:
+    core_written = transform_staging_transactions()
+
+    logger.info(
+        "Core transformation completed | inserted=%s",
+        core_written,
+    )
+
+    return core_written
+
+
+def run_fact_transformation() -> int:
+    fact_written = transform_core_transactions_to_fact()
+
+    logger.info(
+        "Fact transformation completed | inserted=%s",
+        fact_written,
+    )
+
+    return fact_written
+
+
+def run_daily_metrics() -> int:
+    metrics_written = build_daily_transaction_metrics()
+
+    logger.info(
+        "Daily metrics transformation completed | affected=%s",
+        metrics_written,
+    )
+
+    return metrics_written
