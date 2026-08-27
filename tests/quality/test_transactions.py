@@ -10,7 +10,7 @@ from finflow.quality.transactions import (
 )
 
 
-TEST_DATE = date(2026, 8, 25)
+TEST_DATE = date(2099, 1, 2)
 
 
 def _insert_quality_test_transaction(
@@ -43,7 +43,7 @@ def _insert_quality_test_transaction(
                     'MQTEST001',
                     %s,
                     'QUALITY_CARD',
-                    '2026-08-25 12:00:00',
+                    '2099-01-02 12:00:00',
                     %s,
                     %s,
                     %s
@@ -81,11 +81,17 @@ def _cleanup_quality_test_data():
 
 
 def test_staging_transactions_pass_quality_checks():
-    count = validate_staging_transactions(
-        transaction_date=TEST_DATE,
-    )
+    _insert_quality_test_transaction()
 
-    assert count == 10
+    try:
+        count = validate_staging_transactions(
+            transaction_date=TEST_DATE,
+        )
+
+        assert count == 1
+
+    finally:
+        _cleanup_quality_test_data()
 
 
 def test_quality_check_fails_when_no_transactions_exist():
