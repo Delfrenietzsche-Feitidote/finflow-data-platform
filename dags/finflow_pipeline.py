@@ -8,14 +8,14 @@ from finflow.orchestration.pipeline import (
     run_fact_transformation,
     run_ingestion_task,
     run_core_transformation,
+    validate_staging_task,
 )
 
 
 default_args = {
     "owner": "finflow",
     "depends_on_past": False,
-    "retries": 2,
-    "retry_delay": timedelta(minutes=5),
+    "retries": 0,
 }
 
 
@@ -34,24 +34,39 @@ with DAG(
         task_id="ingest_transactions",
         python_callable=run_ingestion_task,
         op_kwargs={
-            "count": 10,
-            "start_id": 1,
+        "count": 10,
+        "start_id": 1,
+        "batch_date": "{{ ds }}",
         },
+    )
+
+    validate_staging = PythonOperator(
+        task_id="validate_staging",
+        python_callable=validate_staging_task,
     )
 
     transform_core = PythonOperator(
         task_id="transform_core",
         python_callable=run_core_transformation,
+        op_kwargs={
+            "batch_date": "{{ ds }}",
+        },
     )
 
     transform_fact = PythonOperator(
         task_id="transform_fact",
         python_callable=run_fact_transformation,
+        op_kwargs={
+            "batch_date": "{{ ds }}",
+        },
     )
 
     build_daily_metrics = PythonOperator(
         task_id="build_daily_metrics",
         python_callable=run_daily_metrics,
+        op_kwargs={
+            "batch_date": "{{ ds }}",
+        },
     )
 
-    ingest_transactions >> transform_core >> transform_fact >> build_daily_metrics
+    ingest_transactions >> validate_staging >> transform_core >> transform_fact >> build_daily_metrics

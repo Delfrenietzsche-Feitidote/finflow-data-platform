@@ -222,3 +222,43 @@ def test_transformation_is_idempotent():
 
     finally:
         cleanup_test_data()
+
+def test_existing_fact_transaction_is_updated_from_core():
+    cleanup_test_data()
+    insert_test_core_transactions()
+
+    try:
+        transform_core_transactions_to_fact()
+
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE core.transactions
+                    SET transaction_amount = 150.00
+                    WHERE transaction_id = 'TXFACT001';
+                    """
+                )
+
+            conn.commit()
+
+        updated = transform_core_transactions_to_fact()
+
+        assert updated == 1
+
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT transaction_amount
+                    FROM analytics.fact_transactions
+                    WHERE transaction_id = 'TXFACT001';
+                    """
+                )
+
+                amount = cursor.fetchone()[0]
+
+        assert amount == Decimal("150.00")
+
+    finally:
+        cleanup_test_data()

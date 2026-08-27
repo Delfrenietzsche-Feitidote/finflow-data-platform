@@ -51,7 +51,8 @@ def build_daily_transaction_metrics(
                         average_transaction_amount =
                             EXCLUDED.average_transaction_amount,
                         average_transaction_fee =
-                            EXCLUDED.average_transaction_fee
+                            EXCLUDED.average_transaction_fee,
+                        updated_at = CURRENT_TIMESTAMP
                     WHERE
                         analytics.daily_transaction_metrics.transaction_count
                             IS DISTINCT FROM EXCLUDED.transaction_count

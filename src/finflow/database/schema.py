@@ -5,6 +5,7 @@ CREATE_SCHEMAS = """
 CREATE SCHEMA IF NOT EXISTS staging;
 CREATE SCHEMA IF NOT EXISTS core;
 CREATE SCHEMA IF NOT EXISTS analytics;
+CREATE SCHEMA IF NOT EXISTS metadata;
 """
 
 
@@ -132,6 +133,22 @@ CREATE TABLE IF NOT EXISTS analytics.daily_transaction_metrics (
 );
 """
 
+PIPELINE_RUNS_TABLE = """
+CREATE TABLE IF NOT EXISTS metadata.pipeline_runs (
+    run_id BIGSERIAL PRIMARY KEY,
+    pipeline_name VARCHAR(100) NOT NULL,
+    batch_date DATE,
+    status VARCHAR(20) NOT NULL,
+    ingested_count INTEGER NOT NULL DEFAULT 0,
+    core_count INTEGER NOT NULL DEFAULT 0,
+    fact_count INTEGER NOT NULL DEFAULT 0,
+    metrics_count INTEGER NOT NULL DEFAULT 0,
+    started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    error_message TEXT
+);
+"""
+
 def initialize_schema():
     with get_connection() as conn:
         with conn.cursor() as cursor:
@@ -147,4 +164,5 @@ def initialize_schema():
 
             cursor.execute(ANALYTICS_FACT_TRANSACTIONS_TABLE)
             cursor.execute(DAILY_TRANSACTION_METRICS_TABLE)
+            cursor.execute(PIPELINE_RUNS_TABLE)
         conn.commit()

@@ -7,12 +7,16 @@ services:
     container_name: finflow-airflow
 
     environment:
+      # Airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://finflow:finflow@finflow-postgres:5432/airflow
 
+      # FinFlow application database
       PYTHONPATH: /opt/airflow/src
 
-      DB_HOST: postgres
+      DB_HOST: finflow-postgres
       DB_PORT: 5432
       DB_NAME: finflow-data
       DB_USER: finflow

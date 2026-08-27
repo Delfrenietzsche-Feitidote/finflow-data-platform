@@ -16,7 +16,7 @@ def run_ingestion(
     count: int = 10,
     start_id: int = 1,
     batch_date: date | None = None,
-) -> None:
+) -> int:
     logger.info("Ingestion started")
 
     transactions = generate_transactions(
@@ -66,6 +66,10 @@ def run_ingestion(
             len(rejected_transactions),
         )
 
-    logger.info("Ingestion completed")
+    logger.info(
+        "Ingestion completed | batch_date=%s | database_written=%s",
+        batch_date,
+        database_written,
+    )
 
     return database_written

@@ -25,33 +25,43 @@ def insert_test_staging_transactions():
                     transaction_amount,
                     transaction_fee,
                     exchange_rate
-                    )
-                    VALUES
-                    (
-                        'TXTEST001',
-                        'CTEST001',
-                        'ATEST001',
-                        'MTEST001',
-                        'THB',
-                        'TEST_CARD',
-                        '2026-08-10 10:00:00',
-                        100.00,
-                        2.50,
-                        0.029
-                    ),
-                    (
-                        'TXTEST002',
-                        'CTEST002',
-                        'ATEST002',
-                        'MTEST002',
-                        'THB',
-                        'TEST_CARD',
-                        '2026-08-10 11:00:00',
-                        200.00,
-                        5.00,
-                        0.029
-                    )
-                    ON CONFLICT (transaction_id) DO NOTHING;
+                )
+                VALUES
+                (
+                    'TXTEST001',
+                    'CTEST001',
+                    'ATEST001',
+                    'MTEST001',
+                    'THB',
+                    'TEST_CARD',
+                    '2026-08-10 10:00:00',
+                    100.00,
+                    2.50,
+                    0.029
+                ),
+                (
+                    'TXTEST002',
+                    'CTEST002',
+                    'ATEST002',
+                    'MTEST002',
+                    'THB',
+                    'TEST_CARD',
+                    '2026-08-10 11:00:00',
+                    200.00,
+                    5.00,
+                    0.029
+                )
+                ON CONFLICT (transaction_id) DO UPDATE
+                SET
+                    customer_id = EXCLUDED.customer_id,
+                    account_id = EXCLUDED.account_id,
+                    merchant_id = EXCLUDED.merchant_id,
+                    payment_method_code = EXCLUDED.payment_method_code,
+                    currency_code = EXCLUDED.currency_code,
+                    transaction_timestamp = EXCLUDED.transaction_timestamp,
+                    transaction_amount = EXCLUDED.transaction_amount,
+                    transaction_fee = EXCLUDED.transaction_fee,
+                    exchange_rate = EXCLUDED.exchange_rate;
                 """
             )
 
@@ -180,6 +190,45 @@ def test_transformation_is_idempotent():
                 count = cursor.fetchone()[0]
 
         assert count == 2
+
+    finally:
+        cleanup_test_data()
+
+def test_existing_core_transaction_is_updated_from_staging():
+    cleanup_test_data()
+    insert_test_staging_transactions()
+
+    try:
+        transform_staging_transactions()
+
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE staging.stg_transactions
+                    SET transaction_amount = 150.00
+                    WHERE transaction_id = 'TXTEST001';
+                    """
+                )
+            conn.commit()
+
+        updated = transform_staging_transactions()
+
+        assert updated == 1
+
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT transaction_amount
+                    FROM core.transactions
+                    WHERE transaction_id = 'TXTEST001';
+                    """
+                )
+
+                amount = cursor.fetchone()[0]
+
+        assert amount == Decimal("150.00")
 
     finally:
         cleanup_test_data()
