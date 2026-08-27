@@ -124,12 +124,13 @@ def transform_staging_transactions(
                     OR core.transactions.transaction_timestamp IS DISTINCT FROM EXCLUDED.transaction_timestamp
                     OR core.transactions.transaction_amount IS DISTINCT FROM EXCLUDED.transaction_amount
                     OR core.transactions.transaction_fee IS DISTINCT FROM EXCLUDED.transaction_fee
-                    OR core.transactions.exchange_rate IS DISTINCT FROM EXCLUDED.exchange_rate;
+                    OR core.transactions.exchange_rate IS DISTINCT FROM EXCLUDED.exchange_rate
+                RETURNING transaction_id;
                 """,
                 (transaction_date, transaction_date),
             )
 
-            inserted_count = cursor.rowcount
+            inserted_count = len(cursor.fetchall())
 
             conn.commit()
 
