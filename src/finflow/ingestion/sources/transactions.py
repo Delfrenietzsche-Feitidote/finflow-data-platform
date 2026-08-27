@@ -24,7 +24,11 @@ def generate_transactions(
             merchant_id=f"M{i:04d}",
             currency_code="THB",
             payment_method_code="CARD",
-            transaction_timestamp=datetime.now(),
+            transaction_timestamp=(
+                datetime.combine(batch_date, datetime.now().time())
+                if batch_date
+                else datetime.now()
+            ),
             transaction_amount=Decimal("100.00"),
             transaction_fee=Decimal("2.50"),
             exchange_rate=Decimal("0.029"),

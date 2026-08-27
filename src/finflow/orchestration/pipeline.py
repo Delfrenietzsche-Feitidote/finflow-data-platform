@@ -8,6 +8,7 @@ from finflow.quality.pipeline_runs import (
     complete_pipeline_run,
     start_pipeline_run,
 )
+from finflow.common.config import settings
 
 logger = get_logger(__name__)
 
@@ -18,6 +19,8 @@ def run_pipeline(
     batch_date: date | None = None,
 ) -> dict[str, int]:
     logger.info("FinFlow pipeline started")
+
+    batch_date = batch_date or settings.pipeline.batch_date
 
     run_id = start_pipeline_run(batch_date)
 

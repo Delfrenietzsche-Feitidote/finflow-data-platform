@@ -1,5 +1,7 @@
 from datetime import date
 
+from psycopg import cursor
+
 from finflow.database.connection import get_connection
 
 
@@ -56,7 +58,6 @@ def transform_staging_transactions(
                 """,
                 (transaction_date, transaction_date),
             )
-
             cursor.execute(
                 """
                 INSERT INTO core.payment_methods (
@@ -130,6 +131,6 @@ def transform_staging_transactions(
 
             inserted_count = cursor.rowcount
 
-        conn.commit()
+            conn.commit()
 
     return inserted_count
