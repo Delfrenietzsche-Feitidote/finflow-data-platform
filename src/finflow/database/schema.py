@@ -1,3 +1,5 @@
+from psycopg import cursor
+
 from finflow.database.connection import get_connection
 
 
@@ -129,7 +131,8 @@ CREATE TABLE IF NOT EXISTS analytics.daily_transaction_metrics (
     total_transaction_fee NUMERIC(18, 2) NOT NULL,
     average_transaction_amount NUMERIC(18, 2) NOT NULL,
     average_transaction_fee NUMERIC(18, 2) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 """
 
@@ -164,5 +167,13 @@ def initialize_schema():
 
             cursor.execute(ANALYTICS_FACT_TRANSACTIONS_TABLE)
             cursor.execute(DAILY_TRANSACTION_METRICS_TABLE)
+            cursor.execute(
+                """
+                ALTER TABLE analytics.daily_transaction_metrics
+                ADD COLUMN IF NOT EXISTS updated_at
+                TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
+                """
+            )
+
             cursor.execute(PIPELINE_RUNS_TABLE)
         conn.commit()
