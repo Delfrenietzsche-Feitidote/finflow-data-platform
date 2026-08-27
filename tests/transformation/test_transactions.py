@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 
 from finflow.database.connection import get_connection
@@ -124,7 +125,9 @@ def test_staging_transactions_transform_to_core():
     insert_test_staging_transactions()
 
     try:
-        inserted = transform_staging_transactions()
+        inserted = transform_staging_transactions(
+            transaction_date=date(2026, 8, 10)
+        )
 
         assert inserted == 2
 
@@ -171,8 +174,13 @@ def test_transformation_is_idempotent():
     insert_test_staging_transactions()
 
     try:
-        first_inserted = transform_staging_transactions()
-        second_inserted = transform_staging_transactions()
+        first_inserted = transform_staging_transactions(
+            transaction_date=date(2026, 8, 10)
+        )
+
+        second_inserted = transform_staging_transactions(
+            transaction_date=date(2026, 8, 10)
+        )
 
         assert first_inserted == 2
         assert second_inserted == 0
@@ -199,7 +207,9 @@ def test_existing_core_transaction_is_updated_from_staging():
     insert_test_staging_transactions()
 
     try:
-        transform_staging_transactions()
+        transform_staging_transactions(
+            transaction_date=date(2026, 8, 10)
+        )
 
         with get_connection() as conn:
             with conn.cursor() as cursor:
@@ -212,7 +222,9 @@ def test_existing_core_transaction_is_updated_from_staging():
                 )
             conn.commit()
 
-        updated = transform_staging_transactions()
+        updated = transform_staging_transactions(
+            transaction_date=date(2026, 8, 10)
+        )
 
         assert updated == 1
 
