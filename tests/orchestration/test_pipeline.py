@@ -1,4 +1,4 @@
-from unittest import result
+from datetime import date
 
 from finflow.database.connection import get_connection
 from finflow.orchestration.pipeline import run_pipeline
@@ -6,11 +6,21 @@ from finflow.orchestration.pipeline import run_pipeline
 
 TEST_START_ID = 9001
 TEST_COUNT = 3
+TEST_BATCH_DATE = date(2026, 8, 25)
 
+
+def transaction_ids():
+    return [
+        f"TX20260825{i:06d}"
+        for i in range(
+            TEST_START_ID,
+            TEST_START_ID + TEST_COUNT,
+        )
+    ]
 
 def cleanup_test_data():
     transaction_ids = [
-        f"TX{i:06d}"
+        f"TX20260825{i:06d}"
         for i in range(
             TEST_START_ID,
             TEST_START_ID + TEST_COUNT,
@@ -57,8 +67,13 @@ def cleanup_test_data():
 
             cursor.execute(
                 """
-                DELETE FROM core.accounts
-                WHERE account_id = ANY(%s);
+                DELETE FROM core.accounts a
+                WHERE a.account_id = ANY(%s)
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM core.transactions t
+                    WHERE t.account_id = a.account_id
+                );
                 """,
                 (
                     [
@@ -73,8 +88,13 @@ def cleanup_test_data():
 
             cursor.execute(
                 """
-                DELETE FROM core.customers
-                WHERE customer_id = ANY(%s);
+                DELETE FROM core.customers c
+                WHERE c.customer_id = ANY(%s)
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM core.transactions t
+                    WHERE t.customer_id = c.customer_id
+                );
                 """,
                 (
                     [
@@ -89,8 +109,13 @@ def cleanup_test_data():
 
             cursor.execute(
                 """
-                DELETE FROM core.merchants
-                WHERE merchant_id = ANY(%s);
+                DELETE FROM core.merchants m
+                WHERE m.merchant_id = ANY(%s)
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM core.transactions t
+                    WHERE t.merchant_id = m.merchant_id
+                );
                 """,
                 (
                     [
@@ -113,6 +138,7 @@ def test_run_pipeline():
         result = run_pipeline(
             count=TEST_COUNT,
             start_id=TEST_START_ID,
+            batch_date=TEST_BATCH_DATE,
         )
 
         assert result["ingested"] == TEST_COUNT
@@ -130,7 +156,7 @@ def test_run_pipeline():
                     """,
                     (
                         [
-                            f"TX{i:06d}"
+                            f"TX20260825{i:06d}"
                             for i in range(
                                 TEST_START_ID,
                                 TEST_START_ID + TEST_COUNT,
@@ -153,11 +179,13 @@ def test_run_pipeline_is_idempotent():
         first_result = run_pipeline(
             count=TEST_COUNT,
             start_id=TEST_START_ID,
+            batch_date=TEST_BATCH_DATE,
         )
 
         second_result = run_pipeline(
             count=TEST_COUNT,
             start_id=TEST_START_ID,
+            batch_date=TEST_BATCH_DATE,
         )
 
         assert first_result["ingested"] == TEST_COUNT
@@ -178,7 +206,7 @@ def test_run_pipeline_is_idempotent():
                     """,
                     (
                         [
-                            f"TX{i:06d}"
+                            f"TX20260825{i:06d}"
                             for i in range(
                                 TEST_START_ID,
                                 TEST_START_ID + TEST_COUNT,
