@@ -176,8 +176,6 @@ def run_daily_metrics(
     return metrics_written
 
 def validate_staging_task(**context):
-    from finflow.quality.transactions import validate_staging_transactions
-
     execution_date = context["logical_date"].date()
 
     validated_count = validate_staging_transactions(
