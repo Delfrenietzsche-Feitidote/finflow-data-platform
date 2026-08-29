@@ -23,7 +23,7 @@ with DAG(
     dag_id="finflow_transaction_pipeline",
     default_args=default_args,
     description="FinFlow transaction ingestion and analytics pipeline",
-    schedule=timedelta(days=1),
+    schedule="0 2 * * *",
     start_date=datetime(2026, 1, 1),
     catchup=False,
     max_active_runs=1,
