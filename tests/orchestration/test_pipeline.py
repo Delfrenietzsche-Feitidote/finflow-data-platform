@@ -5,9 +5,6 @@ from finflow.orchestration.pipeline import run_pipeline
 from finflow.quality.transactions import DataQualityError
 from datetime import date
 
-from finflow.database.connection import get_connection
-from finflow.orchestration.pipeline import run_pipeline
-
 
 TEST_START_ID = 9001
 TEST_COUNT = 3
