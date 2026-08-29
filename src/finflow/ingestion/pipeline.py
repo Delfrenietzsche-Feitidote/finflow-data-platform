@@ -7,6 +7,7 @@ from finflow.ingestion.loaders.rejected_writer import write_rejected_transaction
 from finflow.ingestion.sources.transactions import generate_transactions
 from finflow.ingestion.validators.batch import validate_transactions
 from finflow.database.writer import write_transactions
+from finflow.quality.transactions import validate_staging_transactions
 
 
 logger = get_logger(__name__)

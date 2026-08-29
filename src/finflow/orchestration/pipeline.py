@@ -9,6 +9,7 @@ from finflow.quality.pipeline_runs import (
     start_pipeline_run,
 )
 from finflow.common.config import settings
+from finflow.quality.transactions import validate_staging_transactions
 
 logger = get_logger(__name__)
 
@@ -29,6 +30,15 @@ def run_pipeline(
             count=count,
             start_id=start_id,
             batch_date=batch_date,
+        )
+
+        validated_count = validate_staging_transactions(
+            transaction_date=batch_date,
+        )
+
+        logger.info(
+            "Data quality validation completed | validated=%s",
+            validated_count,
         )
 
         core_written = transform_staging_transactions(
