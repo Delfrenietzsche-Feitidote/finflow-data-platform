@@ -1,3 +1,8 @@
+import pytest
+
+from finflow.database.connection import get_connection
+from finflow.orchestration.pipeline import run_pipeline
+from finflow.quality.transactions import DataQualityError
 from datetime import date
 
 from finflow.database.connection import get_connection
@@ -29,6 +34,20 @@ def cleanup_test_data():
 
     with get_connection() as conn:
         with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                DELETE FROM core.transactions
+                WHERE transaction_id = 'TXDQFAIL001';
+                """
+            )
+
+            cursor.execute(
+                """
+                DELETE FROM staging.stg_transactions
+                WHERE transaction_id = 'TXDQFAIL001';
+                """
+            )
+
             cursor.execute(
                 """
                 DELETE FROM analytics.daily_transaction_metrics
@@ -218,6 +237,68 @@ def test_run_pipeline_is_idempotent():
                 fact_count = cursor.fetchone()[0]
 
         assert fact_count == TEST_COUNT
+
+    finally:
+        cleanup_test_data()
+
+
+def test_run_pipeline_stops_on_data_quality_failure():
+    cleanup_test_data()
+
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO staging.stg_transactions (
+                        transaction_id,
+                        customer_id,
+                        account_id,
+                        merchant_id,
+                        currency_code,
+                        payment_method_code,
+                        transaction_timestamp,
+                        transaction_amount,
+                        transaction_fee,
+                        exchange_rate
+                    )
+                    VALUES (
+                        'TXDQFAIL001',
+                        'CDQFAIL001',
+                        'ADQFAIL001',
+                        'MDQFAIL001',
+                        'THB',
+                        'CARD',
+                        '2026-08-25 10:00:00',
+                        -100.00,
+                        2.50,
+                        0.029
+                    );
+                    """
+                )
+
+            conn.commit()
+
+        with pytest.raises(DataQualityError):
+            run_pipeline(
+                count=0,
+                start_id=9001,
+                batch_date=TEST_BATCH_DATE,
+            )
+
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM core.transactions
+                    WHERE transaction_id = 'TXDQFAIL001';
+                    """
+                )
+
+                core_count = cursor.fetchone()[0]
+
+        assert core_count == 0
 
     finally:
         cleanup_test_data()
