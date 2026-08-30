@@ -1,16 +1,19 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.utils.trigger_rule import TriggerRule
 
 from finflow.orchestration.pipeline import (
+    fail_pipeline_run_task,
+    complete_pipeline_run_task,
     run_daily_metrics,
     run_fact_transformation,
     run_ingestion_task,
     run_core_transformation,
+    start_pipeline_run_task,
     validate_staging_task,
 )
-
 
 default_args = {
     "owner": "finflow",
@@ -29,6 +32,11 @@ with DAG(
     max_active_runs=1,
     tags=["finflow", "data-engineering", "etl"],
 ) as dag:
+
+    start_pipeline_run = PythonOperator(
+        task_id="start_pipeline_run",
+        python_callable=start_pipeline_run_task,
+    )
 
     ingest_transactions = PythonOperator(
         task_id="ingest_transactions",
@@ -69,4 +77,53 @@ with DAG(
         },
     )
 
-    ingest_transactions >> validate_staging >> transform_core >> transform_fact >> build_daily_metrics
+    complete_pipeline_run = PythonOperator(
+        task_id="complete_pipeline_run",
+        python_callable=complete_pipeline_run_task,
+    )
+
+    fail_pipeline_run = PythonOperator(
+        task_id="fail_pipeline_run",
+        python_callable=fail_pipeline_run_task,
+        trigger_rule=TriggerRule.ONE_FAILED,
+    )
+
+    (
+        start_pipeline_run
+        >> ingest_transactions
+        >> validate_staging
+        >> transform_core
+        >> transform_fact
+        >> build_daily_metrics
+        >> complete_pipeline_run
+    )
+
+    (
+        start_pipeline_run
+        >> fail_pipeline_run
+    )
+
+    (
+        ingest_transactions
+        >> fail_pipeline_run
+    )
+
+    (
+        validate_staging
+        >> fail_pipeline_run
+    )
+
+    (
+        transform_core
+        >> fail_pipeline_run
+    )
+
+    (
+        transform_fact
+        >> fail_pipeline_run
+    )
+
+    (
+        build_daily_metrics
+        >> fail_pipeline_run
+    )

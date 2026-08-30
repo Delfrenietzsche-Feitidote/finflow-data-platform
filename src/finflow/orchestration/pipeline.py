@@ -13,6 +13,114 @@ from finflow.quality.transactions import validate_staging_transactions
 
 logger = get_logger(__name__)
 
+def start_pipeline_run_task(**context):
+    execution_date = context["logical_date"].date()
+
+    run_id = start_pipeline_run(execution_date)
+
+    logger.info(
+        "Pipeline run started | run_id=%s | batch_date=%s",
+        run_id,
+        execution_date,
+    )
+
+    return run_id
+
+
+def complete_pipeline_run_task(**context):
+    ti = context["ti"]
+
+    run_id = ti.xcom_pull(
+        task_ids="start_pipeline_run"
+    )
+
+    ingested_count = ti.xcom_pull(
+        task_ids="ingest_transactions"
+    )
+
+    validated_count = ti.xcom_pull(
+        task_ids="validate_staging"
+    )
+
+    core_count = ti.xcom_pull(
+        task_ids="transform_core"
+    )
+
+    fact_count = ti.xcom_pull(
+        task_ids="transform_fact"
+    )
+
+    metrics_count = ti.xcom_pull(
+        task_ids="build_daily_metrics"
+    )
+
+    logger.info(
+        "Completing pipeline run | "
+        "run_id=%s | ingested=%s | validated=%s | "
+        "core=%s | fact=%s | metrics=%s",
+        run_id,
+        ingested_count,
+        validated_count,
+        core_count,
+        fact_count,
+        metrics_count,
+    )
+
+    complete_pipeline_run(
+        run_id,
+        status="SUCCESS",
+        ingested_count=ingested_count or 0,
+        validated_count=validated_count or 0,
+        core_count=core_count or 0,
+        fact_count=fact_count or 0,
+        metrics_count=metrics_count or 0,
+    )
+
+
+def fail_pipeline_run_task(**context):
+    ti = context["ti"]
+
+    run_id = ti.xcom_pull(
+        task_ids="start_pipeline_run"
+    )
+
+    if run_id is None:
+        logger.error(
+            "Unable to mark pipeline run as FAILED: "
+            "run_id not found"
+        )
+        return
+
+    dag_run = context["dag_run"]
+
+    failed_tasks = [
+        task_instance
+        for task_instance in dag_run.get_task_instances()
+        if task_instance.state == "failed"
+    ]
+
+    if failed_tasks:
+        failed_task_ids = ", ".join(
+            task_instance.task_id
+            for task_instance in failed_tasks
+        )
+        error_message = (
+            f"Pipeline task(s) failed: {failed_task_ids}"
+        )
+    else:
+        error_message = "Pipeline task failed"
+
+    complete_pipeline_run(
+        run_id,
+        status="FAILED",
+        error_message=error_message,
+    )
+
+    logger.error(
+        "Pipeline run failed | run_id=%s | error=%s",
+        run_id,
+        error_message,
+    )
 
 def run_pipeline(
     count: int = 10,
@@ -79,11 +187,11 @@ def run_pipeline(
             run_id,
             status="SUCCESS",
             ingested_count=ingestion_result,
+            validated_count=validated_count,
             core_count=core_written,
             fact_count=fact_written,
             metrics_count=metrics_written,
         )
-
         logger.info(
             "FinFlow pipeline completed | %s",
             result,

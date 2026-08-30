@@ -3,8 +3,9 @@ name: FinFlow CI
 on:
   push:
     branches:
-      - main
-      - feature/data-modeling
+    - main
+    - feature/data-modeling
+    - feature/observability
   pull_request:
     branches:
       - main
