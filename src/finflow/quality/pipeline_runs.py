@@ -36,6 +36,7 @@ def complete_pipeline_run(
     *,
     status: str,
     ingested_count: int = 0,
+    validated_count: int = 0,
     core_count: int = 0,
     fact_count: int = 0,
     metrics_count: int = 0,
@@ -49,6 +50,7 @@ def complete_pipeline_run(
                 SET
                     status = %s,
                     ingested_count = %s,
+                    validated_count = %s,
                     core_count = %s,
                     fact_count = %s,
                     metrics_count = %s,
@@ -59,6 +61,7 @@ def complete_pipeline_run(
                 (
                     status,
                     ingested_count,
+                    validated_count,
                     core_count,
                     fact_count,
                     metrics_count,
