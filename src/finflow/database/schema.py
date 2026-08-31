@@ -143,6 +143,7 @@ CREATE TABLE IF NOT EXISTS metadata.pipeline_runs (
     batch_date DATE,
     status VARCHAR(20) NOT NULL,
     ingested_count INTEGER NOT NULL DEFAULT 0,
+    validated_count INTEGER NOT NULL DEFAULT 0,
     core_count INTEGER NOT NULL DEFAULT 0,
     fact_count INTEGER NOT NULL DEFAULT 0,
     metrics_count INTEGER NOT NULL DEFAULT 0,
@@ -176,4 +177,12 @@ def initialize_schema():
             )
 
             cursor.execute(PIPELINE_RUNS_TABLE)
+
+            cursor.execute(
+                """
+                ALTER TABLE metadata.pipeline_runs
+                ADD COLUMN IF NOT EXISTS validated_count
+                INTEGER NOT NULL DEFAULT 0;
+                """
+            )
         conn.commit()
