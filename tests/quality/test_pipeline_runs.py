@@ -33,7 +33,7 @@ def test_pipeline_run_can_be_started_and_completed():
 
         complete_pipeline_run(
             run_id,
-            status = "SUCCESS",
+            status="SUCCESS",
             ingested_count=10,
             validated_count=10,
             core_count=10,

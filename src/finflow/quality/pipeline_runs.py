@@ -1,5 +1,5 @@
 from datetime import date
-
+from typing import Any
 from finflow.database.connection import get_connection
 
 
@@ -71,3 +71,104 @@ def complete_pipeline_run(
             )
 
         conn.commit()
+
+def get_pipeline_run(run_id: int) -> dict[str, Any] | None:
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    run_id,
+                    pipeline_name,
+                    batch_date,
+                    status,
+                    ingested_count,
+                    validated_count,
+                    core_count,
+                    fact_count,
+                    metrics_count,
+                    started_at,
+                    completed_at,
+                    error_message,
+                    completed_at - started_at AS duration
+                FROM metadata.pipeline_runs
+                WHERE run_id = %s;
+                """,
+                (run_id,),
+            )
+
+            row = cursor.fetchone()
+
+    if row is None:
+        return None
+
+    return {
+        "run_id": row[0],
+        "pipeline_name": row[1],
+        "batch_date": row[2],
+        "status": row[3],
+        "ingested_count": row[4],
+        "validated_count": row[5],
+        "core_count": row[6],
+        "fact_count": row[7],
+        "metrics_count": row[8],
+        "started_at": row[9],
+        "completed_at": row[10],
+        "duration": row[11],
+        "error_message": row[12],
+    }
+
+def get_pipeline_run_history(
+    limit: int = 10,
+) -> list[dict[str, Any]]:
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    run_id,
+                    pipeline_name,
+                    batch_date,
+                    status,
+                    ingested_count,
+                    validated_count,
+                    core_count,
+                    fact_count,
+                    metrics_count,
+                    started_at,
+                    completed_at,
+                    error_message,
+                    completed_at - started_at AS duration
+                FROM metadata.pipeline_runs
+                WHERE pipeline_name = %s
+                ORDER BY run_id DESC
+                LIMIT %s;
+                """,
+                (PIPELINE_NAME, limit),
+            )
+
+            rows = cursor.fetchall()
+
+    return [
+        {
+            "run_id": row[0],
+            "pipeline_name": row[1],
+            "batch_date": row[2],
+            "status": row[3],
+            "ingested_count": row[4],
+            "validated_count": row[5],
+            "core_count": row[6],
+            "fact_count": row[7],
+            "metrics_count": row[8],
+            "started_at": row[9],
+            "completed_at": row[10],
+            "duration": row[11],
+            "error_message": row[12],
+        }
+        for row in rows
+    ]
+
+def get_latest_pipeline_run() -> dict[str, Any] | None:
+    runs = get_pipeline_run_history(limit=1)
+
+    return runs[0] if runs else None
