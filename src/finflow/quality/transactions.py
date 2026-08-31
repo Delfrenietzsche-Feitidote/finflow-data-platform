@@ -9,6 +9,7 @@ class DataQualityError(Exception):
 
 def validate_staging_transactions(
     transaction_date: date | None = None,
+    transaction_ids: list[str] | None = None,
 ) -> int:
     """
     Validate transactions in staging before loading them into core.
@@ -22,8 +23,20 @@ def validate_staging_transactions(
     with get_connection() as conn:
         with conn.cursor() as cursor:
             date_filter = """
-                %s IS NULL
-                OR transaction_timestamp::date = %s
+                (%s IS NULL OR transaction_timestamp::date = %s)
+            """
+
+            params = [transaction_date, transaction_date]
+
+            if transaction_ids is not None:
+                transaction_filter = "transaction_id = ANY(%s)"
+                params.append(transaction_ids)
+            else:
+                transaction_filter = "TRUE"
+
+            where_clause = f"""
+                {date_filter}
+                AND {transaction_filter}
             """
 
             # 1. Check that there are transactions to process.
@@ -31,9 +44,9 @@ def validate_staging_transactions(
                 f"""
                 SELECT COUNT(*)
                 FROM staging.stg_transactions
-                WHERE {date_filter};
+                WHERE {where_clause};
                 """,
-                (transaction_date, transaction_date),
+                params,
             )
 
             row_count = cursor.fetchone()[0]
@@ -64,10 +77,10 @@ def validate_staging_transactions(
                     f"""
                     SELECT COUNT(*)
                     FROM staging.stg_transactions
-                    WHERE ({date_filter})
+                    WHERE {where_clause}
                       AND {column} IS NULL;
                     """,
-                    (transaction_date, transaction_date),
+                    params,
                 )
 
                 null_count = cursor.fetchone()[0]
@@ -84,12 +97,12 @@ def validate_staging_transactions(
                 FROM (
                     SELECT transaction_id
                     FROM staging.stg_transactions
-                    WHERE {date_filter}
+                    WHERE {where_clause}
                     GROUP BY transaction_id
                     HAVING COUNT(*) > 1
                 ) duplicates;
                 """,
-                (transaction_date, transaction_date),
+                params,
             )
 
             duplicate_count = cursor.fetchone()[0]
@@ -104,10 +117,10 @@ def validate_staging_transactions(
                 f"""
                 SELECT COUNT(*)
                 FROM staging.stg_transactions
-                WHERE ({date_filter})
+                WHERE {where_clause}
                   AND transaction_amount < 0;
                 """,
-                (transaction_date, transaction_date),
+                params,
             )
 
             invalid_amount_count = cursor.fetchone()[0]
@@ -123,10 +136,10 @@ def validate_staging_transactions(
                 f"""
                 SELECT COUNT(*)
                 FROM staging.stg_transactions
-                WHERE ({date_filter})
+                WHERE {where_clause}
                   AND transaction_fee < 0;
                 """,
-                (transaction_date, transaction_date),
+                params,
             )
 
             invalid_fee_count = cursor.fetchone()[0]
@@ -142,10 +155,10 @@ def validate_staging_transactions(
                 f"""
                 SELECT COUNT(*)
                 FROM staging.stg_transactions
-                WHERE ({date_filter})
+                WHERE {where_clause}
                   AND exchange_rate <= 0;
                 """,
-                (transaction_date, transaction_date),
+                params,
             )
 
             invalid_exchange_rate_count = cursor.fetchone()[0]
@@ -161,10 +174,10 @@ def validate_staging_transactions(
                 f"""
                 SELECT COUNT(*)
                 FROM staging.stg_transactions
-                WHERE ({date_filter})
+                WHERE {where_clause}
                   AND TRIM(currency_code) = '';
                 """,
-                (transaction_date, transaction_date),
+                params,
             )
 
             empty_currency_count = cursor.fetchone()[0]
@@ -180,13 +193,13 @@ def validate_staging_transactions(
                 f"""
                 SELECT COUNT(*)
                 FROM staging.stg_transactions
-                WHERE ({date_filter})
+                WHERE {where_clause}
                   AND (
                       LENGTH(TRIM(currency_code)) != 3
                       OR TRIM(currency_code) !~ '^[A-Z]{{3}}$'
                   );
                 """,
-                (transaction_date, transaction_date),
+                params,
             )
 
             invalid_currency_count = cursor.fetchone()[0]

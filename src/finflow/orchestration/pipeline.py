@@ -133,6 +133,17 @@ def run_pipeline(
 
     run_id = start_pipeline_run(batch_date)
 
+    transaction_ids = [
+        f"TX{batch_date:%Y%m%d}{i:06d}"
+        for i in range(start_id, start_id + count)
+    ]
+
+    ingestion_result = 0
+    validated_count = 0
+    core_written = 0
+    fact_written = 0
+    metrics_written = 0
+
     try:
         ingestion_result = run_ingestion(
             count=count,
@@ -142,6 +153,7 @@ def run_pipeline(
 
         validated_count = validate_staging_transactions(
             transaction_date=batch_date,
+            transaction_ids=transaction_ids,
         )
 
         logger.info(
@@ -177,7 +189,9 @@ def run_pipeline(
         )
 
         result = {
+            "run_id": run_id,
             "ingested": ingestion_result,
+            "validated": validated_count,
             "core": core_written,
             "fact": fact_written,
             "metrics": metrics_written,
@@ -203,6 +217,11 @@ def run_pipeline(
         complete_pipeline_run(
             run_id,
             status="FAILED",
+            ingested_count=ingestion_result,
+            validated_count=validated_count,
+            core_count=core_written,
+            fact_count=fact_written,
+            metrics_count=metrics_written,
             error_message=str(exc),
         )
 
