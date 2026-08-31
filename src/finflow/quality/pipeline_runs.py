@@ -172,3 +172,40 @@ def get_latest_pipeline_run() -> dict[str, Any] | None:
     runs = get_pipeline_run_history(limit=1)
 
     return runs[0] if runs else None
+
+def get_pipeline_health(run_id: int) -> dict[str, Any] | None:
+    run = get_pipeline_run(run_id)
+
+    if run is None:
+        return None
+
+    ingested = run["ingested_count"]
+    validated = run["validated_count"]
+    core = run["core_count"]
+    fact = run["fact_count"]
+
+    rejected_count = max(ingested - validated, 0)
+
+    validation_success_rate = (
+        (validated / ingested) * 100
+        if ingested > 0
+        else 0.0
+    )
+
+    return {
+        "run_id": run["run_id"],
+        "pipeline_name": run["pipeline_name"],
+        "batch_date": run["batch_date"],
+        "status": run["status"],
+        "started_at": run["started_at"],
+        "completed_at": run["completed_at"],
+        "duration": run["duration"],
+        "ingested_count": ingested,
+        "validated_count": validated,
+        "core_count": core,
+        "fact_count": fact,
+        "metrics_count": run["metrics_count"],
+        "rejected_count": rejected_count,
+        "validation_success_rate": validation_success_rate,
+        "error_message": run["error_message"],
+    }
