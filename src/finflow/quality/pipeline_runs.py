@@ -114,8 +114,8 @@ def get_pipeline_run(run_id: int) -> dict[str, Any] | None:
         "metrics_count": row[8],
         "started_at": row[9],
         "completed_at": row[10],
-        "duration": row[11],
-        "error_message": row[12],
+        "duration": row[12],
+        "error_message": row[11],
     }
 
 def get_pipeline_run_history(
@@ -162,8 +162,8 @@ def get_pipeline_run_history(
             "metrics_count": row[8],
             "started_at": row[9],
             "completed_at": row[10],
-            "duration": row[11],
-            "error_message": row[12],
+            "duration": row[12],
+            "error_message": row[11],
         }
         for row in rows
     ]
