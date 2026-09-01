@@ -39,11 +39,12 @@ jobs:
           --health-retries 10
 
     env:
-      DATABASE_HOST: localhost
-      DATABASE_PORT: 5432
-      DATABASE_NAME: finflow-data
-      DATABASE_USER: finflow
-      DATABASE_PASSWORD: finflow
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: finflow-data
+      DB_USER: finflow
+      DB_PASSWORD: finflow
+      DB_SCHEMA: warehouse
       ENVIRONMENT: test
 
     steps:

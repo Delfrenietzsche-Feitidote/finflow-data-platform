@@ -33,5 +33,5 @@ CREATE TABLE warehouse.dim_merchant (
   
   expiry_date DATE,
   
-  is_current BOOLEAN NOT NULL,
+  is_current BOOLEAN NOT NULL
 );

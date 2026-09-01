@@ -21,6 +21,6 @@
 
     country VARCHAR(100) NOT NULL,
 
-    country_code VARCHAR(2) NOT NULL,
+    country_code VARCHAR(2) NOT NULL
 
 );
