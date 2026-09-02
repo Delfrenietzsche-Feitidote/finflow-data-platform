@@ -95,13 +95,12 @@ jobs:
             -c "SELECT version();"
 
       - name: Initialize database schema
-        shell: bash
         run: |
-          set -e
+          uv run python -c "from finflow.database.schema import initialize_schema; initialize_schema(); print('Application schema initialized successfully.')"
 
+          echo "Creating warehouse schemas..."
           export PGPASSWORD="$DB_PASSWORD"
 
-          echo "Creating schemas..."
           psql \
             -h "$DB_HOST" \
             -p "$DB_PORT" \
@@ -109,7 +108,7 @@ jobs:
             -d "$DB_NAME" \
             -f warehouse/ddl/schemas/create_schemas.sql
 
-          echo "Creating dimensions..."
+          echo "Creating warehouse dimensions..."
           for file in warehouse/ddl/dimensions/*.sql; do
             echo "Applying $file"
             psql \
@@ -120,7 +119,7 @@ jobs:
               -f "$file"
           done
 
-          echo "Creating facts..."
+          echo "Creating warehouse facts..."
           for file in warehouse/ddl/facts/*.sql; do
             echo "Applying $file"
             psql \

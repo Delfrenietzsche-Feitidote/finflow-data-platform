@@ -1,5 +1,3 @@
-from psycopg import cursor
-
 from finflow.database.connection import get_connection
 
 
