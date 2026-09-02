@@ -34,9 +34,14 @@ def complete_pipeline_run_task(**context):
         task_ids="start_pipeline_run"
     )
 
-    ingested_count = ti.xcom_pull(
-        task_ids="ingest_transactions"
+    ingestion_result = ti.xcom_pull(
+    task_ids="ingest_transactions"
     )
+
+    if isinstance(ingestion_result, dict):
+        ingested_count = ingestion_result.get("count", 0)
+    else:
+        ingested_count = ingestion_result or 0
 
     validated_count = ti.xcom_pull(
         task_ids="validate_staging"
@@ -242,14 +247,25 @@ def run_ingestion_task(
     count: int = 10,
     start_id: int = 1,
     batch_date: date | str | None = None,
-) -> int:
+) -> dict:
     batch_date = _normalize_batch_date(batch_date)
+    batch_date = batch_date or settings.pipeline.batch_date
 
-    return run_ingestion(
+    transaction_ids = [
+        f"TX{batch_date:%Y%m%d}{i:06d}"
+        for i in range(start_id, start_id + count)
+    ]
+
+    inserted_count = run_ingestion(
         count=count,
         start_id=start_id,
         batch_date=batch_date,
     )
+
+    return {
+        "count": inserted_count,
+        "transaction_ids": transaction_ids,
+    }
 
 
 def run_core_transformation(
@@ -303,15 +319,25 @@ def run_daily_metrics(
     return metrics_written
 
 def validate_staging_task(**context):
+    ti = context["ti"]
+
+    ingestion_result = ti.xcom_pull(
+        task_ids="ingest_transactions"
+    )
+
+    transaction_ids = ingestion_result["transaction_ids"]
+
     execution_date = context["logical_date"].date()
 
     validated_count = validate_staging_transactions(
         transaction_date=execution_date,
+        transaction_ids=transaction_ids,
     )
 
     logger.info(
-        "Data quality validation completed | validated=%s",
+        "Data quality validation completed | validated=%s | transactions=%s",
         validated_count,
+        len(transaction_ids),
     )
 
     return validated_count
