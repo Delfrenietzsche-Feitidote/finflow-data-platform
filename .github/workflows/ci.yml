@@ -70,62 +70,53 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --dev
 
-      - name: Wait for PostgreSQL
-        shell: bash
+      - name: Verify PostgreSQL
         run: |
-          for i in {1..30}; do
-            if pg_isready \
-              -h "$DATABASE_HOST" \
-              -p "$DATABASE_PORT" \
-              -U "$DATABASE_USER" \
-              -d "$DATABASE_NAME"; then
-              echo "PostgreSQL is ready"
-              exit 0
-            fi
-
-            echo "Waiting for PostgreSQL..."
-            sleep 1
-          done
-
-          echo "PostgreSQL did not become ready"
-          exit 1
+          PGPASSWORD="$DB_PASSWORD" psql \
+            -h "$DB_HOST" \
+            -p "$DB_PORT" \
+            -U "$DB_USER" \
+            -d "$DB_NAME" \
+            -c "SELECT version();"
 
       - name: Initialize database schema
         shell: bash
         run: |
           set -e
 
-          export PGPASSWORD="$DATABASE_PASSWORD"
+          export PGPASSWORD="$DB_PASSWORD"
 
           echo "Creating schemas..."
           psql \
-            -h "$DATABASE_HOST" \
-            -p "$DATABASE_PORT" \
-            -U "$DATABASE_USER" \
-            -d "$DATABASE_NAME" \
+            -h "$DB_HOST" \
+            -p "$DB_PORT" \
+            -U "$DB_USER" \
+            -d "$DB_NAME" \
             -f warehouse/ddl/schemas/create_schemas.sql
 
           echo "Creating dimensions..."
           for file in warehouse/ddl/dimensions/*.sql; do
-            echo "Running $file"
+            echo "Applying $file"
             psql \
-              -h "$DATABASE_HOST" \
-              -p "$DATABASE_PORT" \
-              -U "$DATABASE_USER" \
-              -d "$DATABASE_NAME" \
+              -h "$DB_HOST" \
+              -p "$DB_PORT" \
+              -U "$DB_USER" \
+              -d "$DB_NAME" \
               -f "$file"
           done
 
           echo "Creating facts..."
           for file in warehouse/ddl/facts/*.sql; do
-            echo "Running $file"
+            echo "Applying $file"
             psql \
-              -h "$DATABASE_HOST" \
-              -p "$DATABASE_PORT" \
-              -U "$DATABASE_USER" \
-              -d "$DATABASE_NAME" \
+              -h "$DB_HOST" \
+              -p "$DB_PORT" \
+              -U "$DB_USER" \
+              -d "$DB_NAME" \
               -f "$file"
           done
+
+          echo "Database schema initialized successfully."
 
       - name: Run tests
         run: uv run pytest -q
