@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: finflow
+          POSTGRES_PASSWORD: finflow
+          POSTGRES_DB: finflow-data
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U finflow -d finflow-data"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: finflow-data
+      DB_USER: finflow
+      DB_PASSWORD: finflow
+      DB_SCHEMA: warehouse
+
+      PIPELINE_BATCH_DATE: "2026-08-10"
+      PIPELINE_BATCH_SIZE: "10000"
+      PIPELINE_MAX_RETRIES: "3"
+      PIPELINE_RETRY_DELAY: "30"
+      PIPELINE_SOURCE_SYSTEM: financial_transactions
+
+      STORAGE_BUCKET_NAME: finflow-data
+      STORAGE_RAW_PATH: raw/
+      STORAGE_STAGING_PATH: staging/
+      STORAGE_REJECTED_PATH: rejected/
+
+      LOG_LEVEL: INFO
+      LOG_FORMAT: json
+
+      ENVIRONMENT: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: latest
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync --locked --dev
+
+      - name: Verify PostgreSQL
+        run: |
+          PGPASSWORD="$DB_PASSWORD" psql \
+            -h "$DB_HOST" \
+            -p "$DB_PORT" \
+            -U "$DB_USER" \
+            -d "$DB_NAME" \
+            -c "SELECT version();"
+
+      - name: Initialize database schema
+        run: |
+          uv run python -c "from finflow.database.schema import initialize_schema; initialize_schema(); print('Application schema initialized successfully.')"
+
+          echo "Creating warehouse schemas..."
+          export PGPASSWORD="$DB_PASSWORD"
+
+          psql \
+            -h "$DB_HOST" \
+            -p "$DB_PORT" \
+            -U "$DB_USER" \
+            -d "$DB_NAME" \
+            -f warehouse/ddl/schemas/create_schemas.sql
+
+          echo "Creating warehouse dimensions..."
+          for file in warehouse/ddl/dimensions/*.sql; do
+            echo "Applying $file"
+            psql \
+              -h "$DB_HOST" \
+              -p "$DB_PORT" \
+              -U "$DB_USER" \
+              -d "$DB_NAME" \
+              -f "$file"
+          done
+
+          echo "Creating warehouse facts..."
+          for file in warehouse/ddl/facts/*.sql; do
+            echo "Applying $file"
+            psql \
+              -h "$DB_HOST" \
+              -p "$DB_PORT" \
+              -U "$DB_USER" \
+              -d "$DB_NAME" \
+              -f "$file"
+          done
+
+          echo "Database schema initialized successfully."
+
+      - name: Run tests
+        run: uv run pytest -q
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/airflow/Dockerfile
+          push: false
+          tags: finflow-airflow:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

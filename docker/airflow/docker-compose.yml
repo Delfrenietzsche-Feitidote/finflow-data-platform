@@ -1,0 +1,55 @@
+services:
+  airflow:
+    build:
+      context: ../..
+      dockerfile: docker/airflow/Dockerfile
+
+    container_name: finflow-airflow
+
+    environment:
+      # Airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://finflow:finflow@finflow-postgres:5432/airflow
+
+      # FinFlow application database
+      PYTHONPATH: /opt/airflow/src
+
+      DB_HOST: finflow-postgres
+      DB_PORT: 5432
+      DB_NAME: finflow-data
+      DB_USER: finflow
+      DB_PASSWORD: finflow
+      DB_SCHEMA: warehouse
+
+      PIPELINE_BATCH_DATE: "2026-08-10"
+      PIPELINE_BATCH_SIZE: "10000"
+      PIPELINE_MAX_RETRIES: "3"
+      PIPELINE_RETRY_DELAY: "30"
+      PIPELINE_SOURCE_SYSTEM: financial_transactions
+
+      STORAGE_BUCKET_NAME: finflow-data
+      STORAGE_RAW_PATH: raw/
+      STORAGE_STAGING_PATH: staging/
+      STORAGE_REJECTED_PATH: rejected/
+
+      LOG_LEVEL: INFO
+      LOG_FORMAT: json
+
+    volumes:
+      - ../../dags:/opt/airflow/dags
+      - ../../src:/opt/airflow/src
+
+    ports:
+      - "8080:8080"
+
+    command: standalone
+
+    networks:
+      - finflow
+
+networks:
+  finflow:
+    external: true
+    name: docker_default
