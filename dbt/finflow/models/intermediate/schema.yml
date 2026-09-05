@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: int_transactions_enriched
+    description: "Transaction-level analytical model built from deduplicated staging transactions."
+
+    columns:
+      - name: transaction_id
+        description: "Unique transaction identifier."
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Customer associated with the transaction."
+        tests:
+          - not_null
+
+      - name: account_id
+        description: "Account associated with the transaction."
+        tests:
+          - not_null
+
+      - name: merchant_id
+        description: "Merchant associated with the transaction."
+        tests:
+          - not_null
+
+      - name: payment_method_code
+        description: "Payment method used for the transaction."
+        tests:
+          - not_null
+
+      - name: transaction_date
+        description: "Calendar date of the transaction."
+        tests:
+          - not_null
+
+      - name: transaction_amount
+        description: "Transaction amount before fees."
+        tests:
+          - not_null
+
+      - name: transaction_fee
+        description: "Transaction fee."
+        tests:
+          - not_null
+
+      - name: fee_rate
+        description: "Transaction fee divided by transaction amount."
+
+      - name: net_transaction_amount
+        description: "Transaction amount after subtracting the transaction fee."
+
+  - name: int_daily_transaction_summary
+    description: "Daily transaction-level aggregation used as a foundation for analytical marts."
+
+    columns:
+      - name: transaction_date
+        description: "Calendar date of the transactions."
+        tests:
+          - not_null
+          - unique
+
+      - name: transaction_count
+        description: "Number of transactions for the date."
+        tests:
+          - not_null
+
+      - name: total_transaction_amount
+        description: "Total transaction amount for the date."
+        tests:
+          - not_null
+
+      - name: total_transaction_fee
+        description: "Total transaction fees for the date."
+        tests:
+          - not_null
+
+      - name: average_transaction_amount
+        description: "Average transaction amount for the date."
+        tests:
+          - not_null
+
+      - name: average_transaction_fee
+        description: "Average transaction fee for the date."
+        tests:
+          - not_null
+
+      - name: total_net_transaction_amount
+        description: "Total transaction amount after fees for the date."
+        tests:
+          - not_null
