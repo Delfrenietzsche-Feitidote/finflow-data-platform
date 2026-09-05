@@ -1,4 +1,4 @@
-# FinFlow Transaction Analytics Dashboard
+﻿# FinFlow Transaction Analytics Dashboard
 
 ## Overview
 
@@ -22,3 +22,4 @@ dbt Intermediate
 dbt Analytical Marts
     ↓
 Looker Studio Dashboard
+
