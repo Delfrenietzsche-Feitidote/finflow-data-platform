@@ -1,0 +1,112 @@
+version: 2
+
+models:
+  - name: fct_transactions
+    description: "Business-facing transaction fact table at one row per transaction."
+
+    columns:
+      - name: transaction_id
+        description: "Unique identifier for the transaction."
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Customer associated with the transaction."
+        tests:
+          - not_null
+
+      - name: account_id
+        description: "Account associated with the transaction."
+        tests:
+          - not_null
+
+      - name: merchant_id
+        description: "Merchant associated with the transaction."
+        tests:
+          - not_null
+
+      - name: payment_method_code
+        description: "Payment method used for the transaction."
+        tests:
+          - not_null
+
+      - name: currency_code
+        description: "Currency used for the transaction."
+        tests:
+          - not_null
+
+      - name: transaction_timestamp
+        description: "Timestamp when the transaction occurred."
+        tests:
+          - not_null
+
+      - name: transaction_date
+        description: "Calendar date of the transaction."
+        tests:
+          - not_null
+
+      - name: transaction_amount
+        description: "Transaction amount before fees."
+        tests:
+          - not_null
+
+      - name: transaction_fee
+        description: "Fee charged for the transaction."
+        tests:
+          - not_null
+
+      - name: net_transaction_amount
+        description: "Transaction amount after subtracting the transaction fee."
+        tests:
+          - not_null
+
+      - name: exchange_rate
+        description: "Exchange rate associated with the transaction."
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Timestamp when the transaction record was ingested."
+        tests:
+          - not_null
+
+  - name: daily_transaction_metrics
+    description: "Daily business KPI mart aggregated at one row per transaction date."
+
+    columns:
+      - name: transaction_date
+        description: "Calendar date of the transactions."
+        tests:
+          - not_null
+          - unique
+
+      - name: transaction_count
+        description: "Number of transactions processed on the date."
+        tests:
+          - not_null
+
+      - name: total_transaction_amount
+        description: "Total transaction amount for the date."
+        tests:
+          - not_null
+
+      - name: total_transaction_fee
+        description: "Total transaction fees for the date."
+        tests:
+          - not_null
+
+      - name: average_transaction_amount
+        description: "Average transaction amount for the date."
+        tests:
+          - not_null
+
+      - name: average_transaction_fee
+        description: "Average transaction fee for the date."
+        tests:
+          - not_null
+
+      - name: total_net_transaction_amount
+        description: "Total transaction amount after fees for the date."
+        tests:
+          - not_null
