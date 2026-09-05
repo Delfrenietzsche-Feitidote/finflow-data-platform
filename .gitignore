@@ -26,3 +26,8 @@ Thumbs.db
 # Runtime data
 data/
 raw/
+
+# dbt local profile
+dbt/finflow/profiles.yml
+
+dbt/finflow/logs/
