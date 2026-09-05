@@ -1,5 +1,7 @@
 from datetime import date
-
+from finflow.ingestion.loaders.bigquery_writer import (
+    write_transactions_to_bigquery,
+)
 from finflow.common.config import settings
 from finflow.common.logging import get_logger
 from finflow.ingestion.loaders.raw_writer import write_raw_transactions
@@ -56,6 +58,13 @@ def run_ingestion(
         database_written,
     )
 
+    bigquery_written = write_transactions_to_bigquery(valid_transactions)
+
+    logger.info(
+        "BigQuery transactions written: %s",
+        bigquery_written,
+    )
+
     if rejected_transactions:
         write_rejected_transactions(
             rejected_transactions,
@@ -68,9 +77,13 @@ def run_ingestion(
         )
 
     logger.info(
-        "Ingestion completed | batch_date=%s | database_written=%s",
+        "Ingestion completed | batch_date=%s | database_written=%s | bigquery_written=%s",
         batch_date,
         database_written,
+        bigquery_written,
     )
 
-    return database_written
+    return {
+        "database_written": database_written,
+        "bigquery_written": bigquery_written,
+    }

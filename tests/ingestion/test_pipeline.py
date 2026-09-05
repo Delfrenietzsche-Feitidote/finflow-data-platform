@@ -82,18 +82,24 @@ def test_run_ingestion_rejects_invalid_transactions(
     ]
 
     monkeypatch.setattr(
-    "finflow.ingestion.pipeline.generate_transactions",
-    lambda count, start_id=1, **kwargs: transactions,
+        "finflow.ingestion.pipeline.generate_transactions",
+        lambda count, start_id=1, **kwargs: transactions,
     )
 
     monkeypatch.setattr(
-    "finflow.ingestion.pipeline.write_transactions",
-    lambda transactions: len(list(transactions)),
+        "finflow.ingestion.pipeline.write_transactions",
+        lambda transactions: len(list(transactions)),
     )
 
-    database_written = run_ingestion(2)
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions_to_bigquery",
+        lambda transactions: len(list(transactions)),
+    )
 
-    assert database_written == 1
+    result = run_ingestion(2)
+
+    assert result["database_written"] == 1
+    assert result["bigquery_written"] == 1
 
     raw_file = (
         raw_path

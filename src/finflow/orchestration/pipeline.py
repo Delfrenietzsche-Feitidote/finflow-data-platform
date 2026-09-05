@@ -143,7 +143,10 @@ def run_pipeline(
         for i in range(start_id, start_id + count)
     ]
 
-    ingestion_result = 0
+    ingestion_result = {
+        "database_written": 0,
+        "bigquery_written": 0,
+    }
     validated_count = 0
     core_written = 0
     fact_written = 0
@@ -155,6 +158,9 @@ def run_pipeline(
             start_id=start_id,
             batch_date=batch_date,
         )
+
+        database_written = ingestion_result["database_written"]
+        bigquery_written = ingestion_result["bigquery_written"]
 
         validated_count = validate_staging_transactions(
             transaction_date=batch_date,
@@ -195,7 +201,8 @@ def run_pipeline(
 
         result = {
             "run_id": run_id,
-            "ingested": ingestion_result,
+            "ingested": database_written,
+            "bigquery_written": bigquery_written,
             "validated": validated_count,
             "core": core_written,
             "fact": fact_written,
@@ -205,7 +212,7 @@ def run_pipeline(
         complete_pipeline_run(
             run_id,
             status="SUCCESS",
-            ingested_count=ingestion_result,
+            ingested_count=database_written,
             validated_count=validated_count,
             core_count=core_written,
             fact_count=fact_written,
@@ -222,7 +229,7 @@ def run_pipeline(
         complete_pipeline_run(
             run_id,
             status="FAILED",
-            ingested_count=ingestion_result,
+            ingested_count=database_written,
             validated_count=validated_count,
             core_count=core_written,
             fact_count=fact_written,
@@ -256,14 +263,16 @@ def run_ingestion_task(
         for i in range(start_id, start_id + count)
     ]
 
-    inserted_count = run_ingestion(
+    ingestion_result = run_ingestion(
         count=count,
         start_id=start_id,
         batch_date=batch_date,
     )
 
     return {
-        "count": inserted_count,
+        "count": ingestion_result["database_written"],
+        "database_written": ingestion_result["database_written"],
+        "bigquery_written": ingestion_result["bigquery_written"],
         "transaction_ids": transaction_ids,
     }
 
