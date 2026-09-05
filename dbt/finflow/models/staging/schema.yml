@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: "Deduplicated and standardized transaction records from BigQuery RAW."
+    columns:
+      - name: transaction_id
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        tests:
+          - not_null
+
+      - name: account_id
+        tests:
+          - not_null
+
+      - name: transaction_timestamp
+        tests:
+          - not_null
+
+      - name: transaction_amount
+        tests:
+          - not_null
+
+      - name: transaction_date
+        tests:
+          - not_null
+
+      - name: created_at
+        tests:
+          - not_null
