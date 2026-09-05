@@ -31,3 +31,5 @@ raw/
 dbt/finflow/profiles.yml
 
 dbt/finflow/logs/
+
+dbt/finflow/target/

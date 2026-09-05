@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('FINFLOW_GCP_PROJECT_ID') }}"
+    schema: raw
+    tables:
+      - name: transactions
