@@ -24,7 +24,10 @@ def test_run_ingestion(tmp_path, monkeypatch):
 
     monkeypatch.setattr(
         "finflow.ingestion.pipeline.write_transactions",
-        lambda transactions: len(list(transactions)),
+        lambda transactions: [
+            transaction.transaction_id
+            for transaction in transactions
+        ],
     )
 
     monkeypatch.setattr(
@@ -98,7 +101,10 @@ def test_run_ingestion_rejects_invalid_transactions(
 
     monkeypatch.setattr(
         "finflow.ingestion.pipeline.write_transactions",
-        lambda transactions: len(list(transactions)),
+        lambda transactions: [
+            transaction.transaction_id
+            for transaction in transactions
+        ],
     )
 
     monkeypatch.setattr(
@@ -137,3 +143,80 @@ def test_run_ingestion_rejects_invalid_transactions(
     assert "transaction_amount must be greater than 0" in rejected_data[0]["errors"]
     assert "transaction_fee cannot be negative" in rejected_data[0]["errors"]
     assert "exchange_rate must be greater than 0" in rejected_data[0]["errors"]
+
+def test_run_ingestion_only_sends_new_transactions_to_bigquery(
+    tmp_path,
+    monkeypatch,
+):
+    raw_path = tmp_path / "raw"
+    rejected_path = tmp_path / "rejected"
+
+    monkeypatch.setattr(
+        settings.storage,
+        "raw_path",
+        f"{raw_path}/",
+    )
+
+    monkeypatch.setattr(
+        settings.storage,
+        "rejected_path",
+        f"{rejected_path}/",
+    )
+
+    transactions = [
+        TransactionRecord(
+            transaction_id="TX001",
+            customer_id="C001",
+            account_id="A001",
+            merchant_id="M001",
+            currency_code="THB",
+            payment_method_code="CARD",
+            transaction_timestamp="2026-08-24T10:00:00",
+            transaction_amount=Decimal("100.00"),
+            transaction_fee=Decimal("2.50"),
+            exchange_rate=Decimal("0.029"),
+        ),
+        TransactionRecord(
+            transaction_id="TX002",
+            customer_id="C002",
+            account_id="A002",
+            merchant_id="M002",
+            currency_code="THB",
+            payment_method_code="CARD",
+            transaction_timestamp="2026-08-24T10:01:00",
+            transaction_amount=Decimal("200.00"),
+            transaction_fee=Decimal("3.00"),
+            exchange_rate=Decimal("0.029"),
+        ),
+    ]
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.generate_transactions",
+        lambda count, start_id=1, **kwargs: transactions,
+    )
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions",
+        lambda transactions: ["TX001"],
+    )
+
+    bigquery_transactions = []
+
+    def mock_bigquery_writer(transactions):
+        transactions = list(transactions)
+        bigquery_transactions.extend(transactions)
+        return len(transactions)
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions_to_bigquery",
+        mock_bigquery_writer,
+    )
+
+    result = run_ingestion(2)
+
+    assert result["database_written"] == 1
+    assert result["bigquery_written"] == 1
+
+    assert len(bigquery_transactions) == 1
+    assert bigquery_transactions[0].transaction_id == "TX001"
+    

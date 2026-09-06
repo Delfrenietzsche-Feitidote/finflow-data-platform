@@ -30,26 +30,33 @@ VALUES (
     %(exchange_rate)s
 )
 ON CONFLICT (transaction_id) DO NOTHING
+RETURNING transaction_id
 """
 
 
-def write_transactions(transactions: Iterable[TransactionRecord]) -> int:
+def write_transactions(
+    transactions: Iterable[TransactionRecord],
+) -> list[str]:
     records = [
         transaction.model_dump()
         for transaction in transactions
     ]
 
     if not records:
-        return 0
+        return []
 
-    inserted_count = 0
+    inserted_ids = []
 
     with get_connection() as conn:
         with conn.cursor() as cursor:
             for record in records:
                 cursor.execute(INSERT_TRANSACTION, record)
-                inserted_count += cursor.rowcount
+
+                row = cursor.fetchone()
+
+                if row:
+                    inserted_ids.append(row[0])
 
         conn.commit()
 
-    return inserted_count
+    return inserted_ids
