@@ -147,6 +147,8 @@ def run_pipeline(
         "database_written": 0,
         "bigquery_written": 0,
     }
+    database_written = 0
+    bigquery_written = 0
     validated_count = 0
     core_written = 0
     fact_written = 0

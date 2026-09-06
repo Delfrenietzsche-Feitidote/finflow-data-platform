@@ -1,5 +1,10 @@
 import pytest
-
+@pytest.fixture(autouse=True)
+def mock_bigquery_writer(monkeypatch):
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions_to_bigquery",
+        lambda transactions: len(list(transactions)),
+    )
 from finflow.database.connection import get_connection
 from finflow.orchestration.pipeline import run_pipeline
 from finflow.quality.pipeline_runs import get_pipeline_health

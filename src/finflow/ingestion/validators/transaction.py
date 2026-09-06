@@ -10,6 +10,9 @@ def validate_transaction(transaction: TransactionRecord) -> list[str]:
     if not transaction.customer_id.strip():
         errors.append("customer_id is empty")
 
+    if not transaction.account_id.strip():
+        errors.append("account_id is empty")
+
     if not transaction.merchant_id.strip():
         errors.append("merchant_id is empty")
 
@@ -24,6 +27,9 @@ def validate_transaction(transaction: TransactionRecord) -> list[str]:
 
     if transaction.transaction_fee < 0:
         errors.append("transaction_fee cannot be negative")
+
+    if transaction.transaction_fee > transaction.transaction_amount:
+        errors.append("transaction_fee cannot exceed transaction_amount")
 
     if transaction.exchange_rate <= 0:
         errors.append("exchange_rate must be greater than 0")

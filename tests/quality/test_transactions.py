@@ -109,7 +109,7 @@ def test_quality_check_fails_for_negative_transaction_amount():
     try:
         with pytest.raises(
             DataQualityError,
-            match="negative transaction_amount",
+            match="transaction_amount <= 0",
         ):
             validate_staging_transactions(
                 transaction_date=TEST_DATE,
@@ -184,10 +184,26 @@ def test_quality_check_reports_multiple_failures():
 
         message = str(exc_info.value)
 
-        assert "negative transaction_amount" in message
+        assert "transaction_amount <= 0" in message
         assert "negative transaction_fee" in message
         assert "exchange_rate <= 0" in message
         assert "invalid currency_code" in message
 
+    finally:
+        _cleanup_quality_test_data()
+
+def test_quality_check_fails_for_zero_transaction_amount():
+    _insert_quality_test_transaction(
+        transaction_amount=Decimal("0.00"),
+    )
+
+    try:
+        with pytest.raises(
+            DataQualityError,
+            match="transaction_amount <= 0",
+        ):
+            validate_staging_transactions(
+                transaction_date=TEST_DATE,
+            )
     finally:
         _cleanup_quality_test_data()

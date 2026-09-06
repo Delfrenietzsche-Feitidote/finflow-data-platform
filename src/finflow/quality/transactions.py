@@ -112,13 +112,13 @@ def validate_staging_transactions(
                     f"{duplicate_count} duplicate transaction ID(s) found."
                 )
 
-            # 4. Transaction amount must not be negative.
+            # 4. Transaction amount must be greater than 0.
             cursor.execute(
                 f"""
                 SELECT COUNT(*)
                 FROM staging.stg_transactions
                 WHERE {where_clause}
-                  AND transaction_amount < 0;
+                AND transaction_amount <= 0;
                 """,
                 params,
             )
@@ -128,7 +128,7 @@ def validate_staging_transactions(
             if invalid_amount_count > 0:
                 failures.append(
                     f"{invalid_amount_count} transaction(s) have "
-                    "a negative transaction_amount."
+                    "a transaction_amount <= 0."
                 )
 
             # 5. Transaction fee must not be negative.
@@ -150,7 +150,26 @@ def validate_staging_transactions(
                     "a negative transaction_fee."
                 )
 
-            # 6. Exchange rate must be positive.
+            # 6. Transaction fee must not exceed transaction amount.
+            cursor.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM staging.stg_transactions
+                WHERE {where_clause}
+                AND transaction_fee > transaction_amount;
+                """,
+                params,
+            )
+
+            invalid_fee_amount_count = cursor.fetchone()[0]
+
+            if invalid_fee_amount_count > 0:
+                failures.append(
+                    f"{invalid_fee_amount_count} transaction(s) have "
+                    "a transaction_fee greater than transaction_amount."
+                )
+
+            # 7. Exchange rate must be positive.
             cursor.execute(
                 f"""
                 SELECT COUNT(*)
@@ -169,7 +188,7 @@ def validate_staging_transactions(
                     "an exchange_rate <= 0."
                 )
 
-            # 7. Currency code must not be empty.
+            # 8. Currency code must not be empty.
             cursor.execute(
                 f"""
                 SELECT COUNT(*)
@@ -188,7 +207,7 @@ def validate_staging_transactions(
                     "an empty currency_code."
                 )
 
-            # 8. Currency code must be a valid 3-letter uppercase code.
+            # 9. Currency code must be a valid 3-letter uppercase code.
             cursor.execute(
                 f"""
                 SELECT COUNT(*)
