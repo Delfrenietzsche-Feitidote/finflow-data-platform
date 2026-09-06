@@ -292,3 +292,122 @@ def test_run_ingestion_handles_bigquery_failure(
     assert result["status"] == "failed"
     assert result["database_written"] == 2
     assert result["bigquery_written"] == 0
+
+def test_run_ingestion_retries_database_write(
+    tmp_path,
+    monkeypatch,
+):
+    raw_path = tmp_path / "raw"
+    rejected_path = tmp_path / "rejected"
+
+    monkeypatch.setattr(
+        settings.storage,
+        "raw_path",
+        f"{raw_path}/",
+    )
+
+    monkeypatch.setattr(
+        settings.storage,
+        "rejected_path",
+        f"{rejected_path}/",
+    )
+
+    attempts = 0
+
+    def mock_database_writer(transactions):
+        nonlocal attempts
+        attempts += 1
+
+        if attempts < 2:
+            raise RuntimeError("temporary database failure")
+
+        return [
+            transaction.transaction_id
+            for transaction in transactions
+        ]
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions",
+        mock_database_writer,
+    )
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions_to_bigquery",
+        lambda transactions: len(list(transactions)),
+    )
+
+    monkeypatch.setattr(
+        "finflow.common.retry.time.sleep",
+        lambda delay: None,
+    )
+
+    result = run_ingestion(2)
+
+    assert result["status"] == "success"
+    assert result["database_written"] == 2
+    assert result["bigquery_written"] == 2
+    assert attempts == 2
+
+def test_run_ingestion_retries_bigquery_write(
+    tmp_path,
+    monkeypatch,
+):
+    raw_path = tmp_path / "raw"
+    rejected_path = tmp_path / "rejected"
+
+    monkeypatch.setattr(
+        settings.storage,
+        "raw_path",
+        f"{raw_path}/",
+    )
+
+    monkeypatch.setattr(
+        settings.storage,
+        "rejected_path",
+        f"{rejected_path}/",
+    )
+
+    database_attempts = 0
+    bigquery_attempts = 0
+
+    def mock_database_writer(transactions):
+        nonlocal database_attempts
+        database_attempts += 1
+
+        return [
+            transaction.transaction_id
+            for transaction in transactions
+        ]
+
+    def mock_bigquery_writer(transactions):
+        nonlocal bigquery_attempts
+        bigquery_attempts += 1
+
+        if bigquery_attempts < 2:
+            raise RuntimeError("temporary BigQuery failure")
+
+        return len(list(transactions))
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions",
+        mock_database_writer,
+    )
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions_to_bigquery",
+        mock_bigquery_writer,
+    )
+
+    monkeypatch.setattr(
+        "finflow.common.retry.time.sleep",
+        lambda delay: None,
+    )
+
+    result = run_ingestion(2)
+
+    assert result["status"] == "success"
+    assert result["database_written"] == 2
+    assert result["bigquery_written"] == 2
+
+    assert database_attempts == 1
+    assert bigquery_attempts == 2
