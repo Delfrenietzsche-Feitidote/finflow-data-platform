@@ -219,3 +219,4 @@ def test_run_ingestion_only_sends_new_transactions_to_bigquery(
 
     assert len(bigquery_transactions) == 1
     assert bigquery_transactions[0].transaction_id == "TX001"
+    

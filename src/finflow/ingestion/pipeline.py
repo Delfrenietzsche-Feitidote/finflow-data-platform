@@ -52,7 +52,7 @@ def run_ingestion(
     logger.info("Raw transactions written: %s", len(valid_transactions))
 
     inserted_transaction_ids = write_transactions(
-    valid_transactions,
+        valid_transactions,
     )
 
     database_written = len(inserted_transaction_ids)
