@@ -1,7 +1,8 @@
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from datetime import date
-from pydantic import BaseModel
+
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class DatabaseSettings(BaseSettings):
     host: str
@@ -33,6 +34,7 @@ class PipelineSettings(BaseSettings):
         extra="ignore",
     )
 
+
 class StorageSettings(BaseSettings):
     bucket_name: str
     raw_path: str
@@ -45,6 +47,7 @@ class StorageSettings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
+
 
 class LoggingSettings(BaseSettings):
     log_level: str = Field(validation_alias="LOG_LEVEL")

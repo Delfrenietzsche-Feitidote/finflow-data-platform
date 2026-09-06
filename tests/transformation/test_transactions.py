@@ -6,7 +6,6 @@ from finflow.transformation.transactions import (
     transform_staging_transactions,
 )
 
-
 TEST_IDS = ["TXTEST001", "TXTEST002"]
 
 
@@ -119,15 +118,12 @@ def cleanup_test_data():
         conn.commit()
 
 
-
 def test_staging_transactions_transform_to_core():
     cleanup_test_data()
     insert_test_staging_transactions()
 
     try:
-        inserted = transform_staging_transactions(
-            transaction_date=date(2026, 8, 10)
-        )
+        inserted = transform_staging_transactions(transaction_date=date(2026, 8, 10))
 
         assert inserted == 2
 
@@ -202,14 +198,13 @@ def test_transformation_is_idempotent():
     finally:
         cleanup_test_data()
 
+
 def test_existing_core_transaction_is_updated_from_staging():
     cleanup_test_data()
     insert_test_staging_transactions()
 
     try:
-        transform_staging_transactions(
-            transaction_date=date(2026, 8, 10)
-        )
+        transform_staging_transactions(transaction_date=date(2026, 8, 10))
 
         with get_connection() as conn:
             with conn.cursor() as cursor:
@@ -222,9 +217,7 @@ def test_existing_core_transaction_is_updated_from_staging():
                 )
             conn.commit()
 
-        updated = transform_staging_transactions(
-            transaction_date=date(2026, 8, 10)
-        )
+        updated = transform_staging_transactions(transaction_date=date(2026, 8, 10))
 
         assert updated == 1
 

@@ -11,10 +11,7 @@ def write_raw_transactions(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    records = [
-        transaction.model_dump(mode="json")
-        for transaction in transactions
-    ]
+    records = [transaction.model_dump(mode="json") for transaction in transactions]
 
     with path.open("w", encoding="utf-8") as file:
         json.dump(records, file, indent=2)

@@ -11,8 +11,6 @@ from finflow.ingestion.loaders.raw_writer import write_raw_transactions
 from finflow.ingestion.loaders.rejected_writer import write_rejected_transactions
 from finflow.ingestion.sources.transactions import generate_transactions
 from finflow.ingestion.validators.batch import validate_transactions
-from finflow.quality.transactions import validate_staging_transactions
-
 
 logger = get_logger(__name__)
 
@@ -36,9 +34,7 @@ def run_ingestion(
 
         logger.info("Transactions extracted: %s", len(transactions))
 
-        valid_transactions, rejected_transactions = validate_transactions(
-            transactions
-        )
+        valid_transactions, rejected_transactions = validate_transactions(transactions)
 
         logger.info(
             "Validation completed | valid=%s | rejected=%s",
@@ -100,7 +96,8 @@ def run_ingestion(
             )
 
         logger.info(
-            "Ingestion completed | batch_date=%s | database_written=%s | bigquery_written=%s",
+            "Ingestion completed | batch_date=%s | database_written=%s | "
+            "bigquery_written=%s",
             batch_date,
             database_written,
             bigquery_written,

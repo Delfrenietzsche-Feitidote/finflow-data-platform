@@ -54,6 +54,7 @@ def test_invalid_exchange_rate_is_rejected():
 
     assert "exchange_rate must be greater than 0" in errors
 
+
 def test_empty_account_id_is_rejected():
     transaction = create_transaction()
     transaction.account_id = "   "
