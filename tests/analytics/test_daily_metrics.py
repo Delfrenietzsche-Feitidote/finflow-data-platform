@@ -5,7 +5,6 @@ from finflow.analytics.daily_metrics import (
 )
 from finflow.database.connection import get_connection
 
-
 TEST_DATE = "2099-01-01"
 
 
@@ -104,9 +103,7 @@ def test_daily_transaction_metrics():
     insert_test_fact_transactions()
 
     try:
-        inserted = build_daily_transaction_metrics(
-                transaction_date=TEST_DATE
-            )
+        inserted = build_daily_transaction_metrics(transaction_date=TEST_DATE)
 
         assert inserted == 1
 
@@ -147,12 +144,8 @@ def test_daily_transaction_metrics_is_idempotent():
     insert_test_fact_transactions()
 
     try:
-        first_inserted = build_daily_transaction_metrics(
-            transaction_date=TEST_DATE
-        )
-        second_inserted = build_daily_transaction_metrics(
-            transaction_date=TEST_DATE
-        )
+        first_inserted = build_daily_transaction_metrics(transaction_date=TEST_DATE)
+        second_inserted = build_daily_transaction_metrics(transaction_date=TEST_DATE)
 
         assert first_inserted == 1
         assert second_inserted == 0
@@ -160,15 +153,13 @@ def test_daily_transaction_metrics_is_idempotent():
     finally:
         cleanup_test_data()
 
+
 def test_daily_transaction_metrics_updates_existing_date():
     cleanup_test_data()
     insert_test_fact_transactions()
 
     try:
-        first_inserted = build_daily_transaction_metrics(
-            transaction_date=TEST_DATE
-        )
-        
+        first_inserted = build_daily_transaction_metrics(transaction_date=TEST_DATE)
 
         assert first_inserted == 1
 
@@ -208,9 +199,7 @@ def test_daily_transaction_metrics_updates_existing_date():
 
             conn.commit()
 
-        updated = build_daily_transaction_metrics(
-                    transaction_date=TEST_DATE
-            )
+        updated = build_daily_transaction_metrics(transaction_date=TEST_DATE)
 
         assert updated == 1
 

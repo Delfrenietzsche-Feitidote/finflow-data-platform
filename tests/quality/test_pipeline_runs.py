@@ -82,6 +82,7 @@ def test_pipeline_run_can_be_started_and_completed():
     finally:
         cleanup_test_runs()
 
+
 def test_failed_pipeline_run_defaults_counts_to_zero():
     cleanup_test_runs()
 
@@ -126,6 +127,7 @@ def test_failed_pipeline_run_defaults_counts_to_zero():
 
     finally:
         cleanup_test_runs()
+
 
 def test_get_pipeline_run_returns_existing_run():
     cleanup_test_runs()

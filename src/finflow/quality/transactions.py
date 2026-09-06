@@ -86,9 +86,7 @@ def validate_staging_transactions(
                 null_count = cursor.fetchone()[0]
 
                 if null_count > 0:
-                    failures.append(
-                        f"{column} contains {null_count} NULL value(s)."
-                    )
+                    failures.append(f"{column} contains {null_count} NULL value(s).")
 
             # 3. Duplicate transaction IDs.
             cursor.execute(
@@ -108,9 +106,7 @@ def validate_staging_transactions(
             duplicate_count = cursor.fetchone()[0]
 
             if duplicate_count > 0:
-                failures.append(
-                    f"{duplicate_count} duplicate transaction ID(s) found."
-                )
+                failures.append(f"{duplicate_count} duplicate transaction ID(s) found.")
 
             # 4. Transaction amount must be greater than 0.
             cursor.execute(
@@ -231,8 +227,7 @@ def validate_staging_transactions(
 
             if failures:
                 message = "Data quality validation failed:\n" + "\n".join(
-                    f"- {failure}"
-                    for failure in failures
+                    f"- {failure}" for failure in failures
                 )
 
                 raise DataQualityError(message)

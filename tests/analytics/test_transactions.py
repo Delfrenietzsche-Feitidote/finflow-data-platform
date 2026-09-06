@@ -1,10 +1,9 @@
 from decimal import Decimal
 
-from finflow.database.connection import get_connection
 from finflow.analytics.transactions import (
     transform_core_transactions_to_fact,
 )
-
+from finflow.database.connection import get_connection
 
 TEST_IDS = ["TXFACT001", "TXFACT002"]
 
@@ -222,6 +221,7 @@ def test_transformation_is_idempotent():
 
     finally:
         cleanup_test_data()
+
 
 def test_existing_fact_transaction_is_updated_from_core():
     cleanup_test_data()

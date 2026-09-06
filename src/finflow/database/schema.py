@@ -1,6 +1,5 @@
 from finflow.database.connection import get_connection
 
-
 CREATE_SCHEMAS = """
 CREATE SCHEMA IF NOT EXISTS staging;
 CREATE SCHEMA IF NOT EXISTS core;
@@ -150,6 +149,7 @@ CREATE TABLE IF NOT EXISTS metadata.pipeline_runs (
     error_message TEXT
 );
 """
+
 
 def initialize_schema():
     with get_connection() as conn:

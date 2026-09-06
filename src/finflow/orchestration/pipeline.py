@@ -1,17 +1,19 @@
+from datetime import date
+
 from finflow.analytics.daily_metrics import build_daily_transaction_metrics
 from finflow.analytics.transactions import transform_core_transactions_to_fact
+from finflow.common.config import settings
 from finflow.common.logging import get_logger
 from finflow.ingestion.pipeline import run_ingestion
-from finflow.transformation.transactions import transform_staging_transactions
-from datetime import date
 from finflow.quality.pipeline_runs import (
     complete_pipeline_run,
     start_pipeline_run,
 )
-from finflow.common.config import settings
 from finflow.quality.transactions import validate_staging_transactions
+from finflow.transformation.transactions import transform_staging_transactions
 
 logger = get_logger(__name__)
+
 
 def start_pipeline_run_task(**context):
     execution_date = context["logical_date"].date()
@@ -30,34 +32,22 @@ def start_pipeline_run_task(**context):
 def complete_pipeline_run_task(**context):
     ti = context["ti"]
 
-    run_id = ti.xcom_pull(
-        task_ids="start_pipeline_run"
-    )
+    run_id = ti.xcom_pull(task_ids="start_pipeline_run")
 
-    ingestion_result = ti.xcom_pull(
-    task_ids="ingest_transactions"
-    )
+    ingestion_result = ti.xcom_pull(task_ids="ingest_transactions")
 
     if isinstance(ingestion_result, dict):
         ingested_count = ingestion_result.get("count", 0)
     else:
         ingested_count = ingestion_result or 0
 
-    validated_count = ti.xcom_pull(
-        task_ids="validate_staging"
-    )
+    validated_count = ti.xcom_pull(task_ids="validate_staging")
 
-    core_count = ti.xcom_pull(
-        task_ids="transform_core"
-    )
+    core_count = ti.xcom_pull(task_ids="transform_core")
 
-    fact_count = ti.xcom_pull(
-        task_ids="transform_fact"
-    )
+    fact_count = ti.xcom_pull(task_ids="transform_fact")
 
-    metrics_count = ti.xcom_pull(
-        task_ids="build_daily_metrics"
-    )
+    metrics_count = ti.xcom_pull(task_ids="build_daily_metrics")
 
     logger.info(
         "Completing pipeline run | "
@@ -85,15 +75,10 @@ def complete_pipeline_run_task(**context):
 def fail_pipeline_run_task(**context):
     ti = context["ti"]
 
-    run_id = ti.xcom_pull(
-        task_ids="start_pipeline_run"
-    )
+    run_id = ti.xcom_pull(task_ids="start_pipeline_run")
 
     if run_id is None:
-        logger.error(
-            "Unable to mark pipeline run as FAILED: "
-            "run_id not found"
-        )
+        logger.error("Unable to mark pipeline run as FAILED: run_id not found")
         return
 
     dag_run = context["dag_run"]
@@ -106,12 +91,9 @@ def fail_pipeline_run_task(**context):
 
     if failed_tasks:
         failed_task_ids = ", ".join(
-            task_instance.task_id
-            for task_instance in failed_tasks
+            task_instance.task_id for task_instance in failed_tasks
         )
-        error_message = (
-            f"Pipeline task(s) failed: {failed_task_ids}"
-        )
+        error_message = f"Pipeline task(s) failed: {failed_task_ids}"
     else:
         error_message = "Pipeline task failed"
 
@@ -127,6 +109,7 @@ def fail_pipeline_run_task(**context):
         error_message,
     )
 
+
 def run_pipeline(
     count: int = 10,
     start_id: int = 1,
@@ -139,8 +122,7 @@ def run_pipeline(
     run_id = start_pipeline_run(batch_date)
 
     transaction_ids = [
-        f"TX{batch_date:%Y%m%d}{i:06d}"
-        for i in range(start_id, start_id + count)
+        f"TX{batch_date:%Y%m%d}{i:06d}" for i in range(start_id, start_id + count)
     ]
 
     ingestion_result = {
@@ -243,6 +225,7 @@ def run_pipeline(
 
         raise
 
+
 def _normalize_batch_date(
     batch_date: date | str | None,
 ) -> date | None:
@@ -261,8 +244,7 @@ def run_ingestion_task(
     batch_date = batch_date or settings.pipeline.batch_date
 
     transaction_ids = [
-        f"TX{batch_date:%Y%m%d}{i:06d}"
-        for i in range(start_id, start_id + count)
+        f"TX{batch_date:%Y%m%d}{i:06d}" for i in range(start_id, start_id + count)
     ]
 
     ingestion_result = run_ingestion(
@@ -329,12 +311,11 @@ def run_daily_metrics(
 
     return metrics_written
 
+
 def validate_staging_task(**context):
     ti = context["ti"]
 
-    ingestion_result = ti.xcom_pull(
-        task_ids="ingest_transactions"
-    )
+    ingestion_result = ti.xcom_pull(task_ids="ingest_transactions")
 
     transaction_ids = ingestion_result["transaction_ids"]
 

@@ -25,8 +25,7 @@ def test_run_ingestion(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "finflow.ingestion.pipeline.write_transactions",
         lambda transactions: [
-            transaction.transaction_id
-            for transaction in transactions
+            transaction.transaction_id for transaction in transactions
         ],
     )
 
@@ -102,8 +101,7 @@ def test_run_ingestion_rejects_invalid_transactions(
     monkeypatch.setattr(
         "finflow.ingestion.pipeline.write_transactions",
         lambda transactions: [
-            transaction.transaction_id
-            for transaction in transactions
+            transaction.transaction_id for transaction in transactions
         ],
     )
 
@@ -143,6 +141,7 @@ def test_run_ingestion_rejects_invalid_transactions(
     assert "transaction_amount must be greater than 0" in rejected_data[0]["errors"]
     assert "transaction_fee cannot be negative" in rejected_data[0]["errors"]
     assert "exchange_rate must be greater than 0" in rejected_data[0]["errors"]
+
 
 def test_run_ingestion_only_sends_new_transactions_to_bigquery(
     tmp_path,
@@ -220,6 +219,7 @@ def test_run_ingestion_only_sends_new_transactions_to_bigquery(
     assert len(bigquery_transactions) == 1
     assert bigquery_transactions[0].transaction_id == "TX001"
 
+
 def test_run_ingestion_handles_database_failure(
     tmp_path,
     monkeypatch,
@@ -275,8 +275,7 @@ def test_run_ingestion_handles_bigquery_failure(
     monkeypatch.setattr(
         "finflow.ingestion.pipeline.write_transactions",
         lambda transactions: [
-            transaction.transaction_id
-            for transaction in transactions
+            transaction.transaction_id for transaction in transactions
         ],
     )
 
@@ -292,6 +291,7 @@ def test_run_ingestion_handles_bigquery_failure(
     assert result["status"] == "failed"
     assert result["database_written"] == 2
     assert result["bigquery_written"] == 0
+
 
 def test_run_ingestion_retries_database_write(
     tmp_path,
@@ -321,10 +321,7 @@ def test_run_ingestion_retries_database_write(
         if attempts < 2:
             raise RuntimeError("temporary database failure")
 
-        return [
-            transaction.transaction_id
-            for transaction in transactions
-        ]
+        return [transaction.transaction_id for transaction in transactions]
 
     monkeypatch.setattr(
         "finflow.ingestion.pipeline.write_transactions",
@@ -347,6 +344,7 @@ def test_run_ingestion_retries_database_write(
     assert result["database_written"] == 2
     assert result["bigquery_written"] == 2
     assert attempts == 2
+
 
 def test_run_ingestion_retries_bigquery_write(
     tmp_path,
@@ -374,10 +372,7 @@ def test_run_ingestion_retries_bigquery_write(
         nonlocal database_attempts
         database_attempts += 1
 
-        return [
-            transaction.transaction_id
-            for transaction in transactions
-        ]
+        return [transaction.transaction_id for transaction in transactions]
 
     def mock_bigquery_writer(transactions):
         nonlocal bigquery_attempts

@@ -21,4 +21,21 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
+    "ruff>=0.16.6",
 ]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint.per-file-ignores]
+"src/finflow/analytics/daily_metrics.py" = ["E501"]
+"src/finflow/analytics/transactions.py" = ["E501"]
+"src/finflow/transformation/transactions.py" = ["E501"]

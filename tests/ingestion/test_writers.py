@@ -1,5 +1,5 @@
-from decimal import Decimal
 import json
+from decimal import Decimal
 
 from finflow.ingestion.loaders.raw_writer import write_raw_transactions
 from finflow.ingestion.loaders.rejected_writer import (

@@ -65,12 +65,8 @@ def test_bigquery_writer_uses_deterministic_job_id(monkeypatch):
     assert result == 2
     assert captured["project"] == "test-project"
     assert captured["table_ref"] == "test-project.raw.transactions"
-    assert captured["job_id"].startswith(
-        "finflow_transactions_"
-    )
-    assert len(captured["job_id"]) == (
-        len("finflow_transactions_") + 32
-    )
+    assert captured["job_id"].startswith("finflow_transactions_")
+    assert len(captured["job_id"]) == (len("finflow_transactions_") + 32)
 
 
 def test_bigquery_job_id_is_independent_of_transaction_order():
@@ -84,9 +80,7 @@ def test_bigquery_job_id_is_independent_of_transaction_order():
         make_transaction("TX001"),
     ]
 
-    assert _build_job_id(transactions_a) == _build_job_id(
-        transactions_b
-    )
+    assert _build_job_id(transactions_a) == _build_job_id(transactions_b)
 
 
 def test_bigquery_writer_returns_zero_for_empty_batch(
@@ -94,9 +88,7 @@ def test_bigquery_writer_returns_zero_for_empty_batch(
 ):
     class FailingClient:
         def __init__(self, project):
-            raise AssertionError(
-                "BigQuery client should not be created"
-            )
+            raise AssertionError("BigQuery client should not be created")
 
     monkeypatch.setenv(
         "FINFLOW_GCP_PROJECT_ID",

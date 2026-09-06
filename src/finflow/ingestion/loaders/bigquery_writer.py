@@ -1,12 +1,11 @@
 import hashlib
 import os
 from collections.abc import Iterable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from google.cloud import bigquery
 
 from finflow.ingestion.models.transaction import TransactionRecord
-
 
 DATASET_ID = "raw"
 TABLE_ID = "transactions"
@@ -21,9 +20,7 @@ def _build_job_id(transactions: list[TransactionRecord]) -> str:
         )
     )
 
-    digest = hashlib.sha256(
-        batch_key.encode("utf-8")
-    ).hexdigest()[:32]
+    digest = hashlib.sha256(batch_key.encode("utf-8")).hexdigest()[:32]
 
     return f"finflow_transactions_{digest}"
 
@@ -38,7 +35,7 @@ def write_transactions_to_bigquery(
     if not transactions:
         return 0
 
-    ingested_at = datetime.now(timezone.utc).isoformat()
+    ingested_at = datetime.now(UTC).isoformat()
 
     records = []
 

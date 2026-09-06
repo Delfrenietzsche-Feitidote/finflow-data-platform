@@ -2,7 +2,6 @@ import time
 from collections.abc import Callable
 from typing import TypeVar
 
-
 T = TypeVar("T")
 
 
@@ -25,7 +24,7 @@ def retry(
             if attempt == max_attempts - 1:
                 raise
 
-            delay = base_delay * (2 ** attempt)
+            delay = base_delay * (2**attempt)
             time.sleep(delay)
 
     raise last_exception

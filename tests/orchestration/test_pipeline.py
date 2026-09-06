@@ -1,15 +1,19 @@
+from datetime import date
+
 import pytest
+
+from finflow.database.connection import get_connection
+from finflow.orchestration.pipeline import run_pipeline
+from finflow.quality.pipeline_runs import get_pipeline_health
+from finflow.quality.transactions import DataQualityError
+
+
 @pytest.fixture(autouse=True)
 def mock_bigquery_writer(monkeypatch):
     monkeypatch.setattr(
         "finflow.ingestion.pipeline.write_transactions_to_bigquery",
         lambda transactions: len(list(transactions)),
     )
-from finflow.database.connection import get_connection
-from finflow.orchestration.pipeline import run_pipeline
-from finflow.quality.pipeline_runs import get_pipeline_health
-from finflow.quality.transactions import DataQualityError
-from datetime import date
 
 
 TEST_START_ID = 9001
@@ -25,6 +29,7 @@ def transaction_ids():
             TEST_START_ID + TEST_COUNT,
         )
     ]
+
 
 def cleanup_test_data():
     transaction_ids = [
@@ -230,6 +235,7 @@ def test_run_pipeline():
     finally:
         cleanup_test_data()
 
+
 def test_run_pipeline_is_idempotent():
     cleanup_test_data()
 
@@ -341,6 +347,7 @@ def test_run_pipeline_stops_on_data_quality_failure():
 
     finally:
         cleanup_test_data()
+
 
 def test_run_pipeline_records_pipeline_run_metadata():
     cleanup_test_data()

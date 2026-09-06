@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Any
-from finflow.database.connection import get_connection
 
+from finflow.database.connection import get_connection
 
 PIPELINE_NAME = "finflow_transaction_pipeline"
 
@@ -72,6 +72,7 @@ def complete_pipeline_run(
 
         conn.commit()
 
+
 def get_pipeline_run(run_id: int) -> dict[str, Any] | None:
     with get_connection() as conn:
         with conn.cursor() as cursor:
@@ -117,6 +118,7 @@ def get_pipeline_run(run_id: int) -> dict[str, Any] | None:
         "duration": row[12],
         "error_message": row[11],
     }
+
 
 def get_pipeline_run_history(
     limit: int = 10,
@@ -168,10 +170,12 @@ def get_pipeline_run_history(
         for row in rows
     ]
 
+
 def get_latest_pipeline_run() -> dict[str, Any] | None:
     runs = get_pipeline_run_history(limit=1)
 
     return runs[0] if runs else None
+
 
 def get_pipeline_health(run_id: int) -> dict[str, Any] | None:
     run = get_pipeline_run(run_id)
@@ -186,11 +190,7 @@ def get_pipeline_health(run_id: int) -> dict[str, Any] | None:
 
     rejected_count = max(ingested - validated, 0)
 
-    validation_success_rate = (
-        (validated / ingested) * 100
-        if ingested > 0
-        else 0.0
-    )
+    validation_success_rate = (validated / ingested) * 100 if ingested > 0 else 0.0
 
     return {
         "run_id": run["run_id"],

@@ -9,7 +9,6 @@ from finflow.quality.transactions import (
     validate_staging_transactions,
 )
 
-
 TEST_DATE = date(2099, 1, 2)
 
 
@@ -168,6 +167,7 @@ def test_quality_check_fails_for_invalid_currency_code():
     finally:
         _cleanup_quality_test_data()
 
+
 def test_quality_check_reports_multiple_failures():
     _insert_quality_test_transaction(
         transaction_amount=Decimal("-100.00"),
@@ -191,6 +191,7 @@ def test_quality_check_reports_multiple_failures():
 
     finally:
         _cleanup_quality_test_data()
+
 
 def test_quality_check_fails_for_zero_transaction_amount():
     _insert_quality_test_transaction(

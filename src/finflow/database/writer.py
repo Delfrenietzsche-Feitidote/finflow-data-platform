@@ -3,7 +3,6 @@ from collections.abc import Iterable
 from finflow.database.connection import get_connection
 from finflow.ingestion.models.transaction import TransactionRecord
 
-
 INSERT_TRANSACTION = """
 INSERT INTO staging.stg_transactions (
     transaction_id,
@@ -37,10 +36,7 @@ RETURNING transaction_id
 def write_transactions(
     transactions: Iterable[TransactionRecord],
 ) -> list[str]:
-    records = [
-        transaction.model_dump()
-        for transaction in transactions
-    ]
+    records = [transaction.model_dump() for transaction in transactions]
 
     if not records:
         return []
