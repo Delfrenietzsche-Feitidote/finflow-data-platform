@@ -51,14 +51,28 @@ def run_ingestion(
 
     logger.info("Raw transactions written: %s", len(valid_transactions))
 
-    database_written = write_transactions(valid_transactions)
+    inserted_transaction_ids = write_transactions(
+    valid_transactions,
+    )
+
+    database_written = len(inserted_transaction_ids)
 
     logger.info(
         "Database transactions written: %s",
         database_written,
     )
 
-    bigquery_written = write_transactions_to_bigquery(valid_transactions)
+    inserted_transaction_id_set = set(inserted_transaction_ids)
+
+    new_transactions = [
+        transaction
+        for transaction in valid_transactions
+        if transaction.transaction_id in inserted_transaction_id_set
+    ]
+
+    bigquery_written = write_transactions_to_bigquery(
+        new_transactions,
+    )
 
     logger.info(
         "BigQuery transactions written: %s",
