@@ -8,7 +8,7 @@ The project focuses on production-oriented engineering practices including **dat
 
 ---
 
-## 🚧 Project Status
+## Project Status
 
 **Current Sprint: Sprint 8 — Production Readiness**
 
@@ -26,8 +26,8 @@ The project focuses on production-oriented engineering practices including **dat
 | Sprint 8.2 | Incremental Processing       | ✅ Complete     |
 | Sprint 8.3 | Production Reliability       | ✅ Complete     |
 | Sprint 8.4 | CI/CD Improvements           | ✅ Complete     |
-| Sprint 8.5 | Architecture & Documentation | 🚧 In Progress |
-| Sprint 8.6 | Final Portfolio Polish       | ⏳ Upcoming     |
+| Sprint 8.5 | Architecture & Documentation | ✅ Complete     |
+| Sprint 8.6 | Final Portfolio Polish       | 🚧 In Progress  |
 
 ---
 
@@ -498,8 +498,16 @@ uv sync
 
 ### Start the Local Environment
 
+Start PostgreSQL:
+
 ```bash
-docker compose up
+docker compose -f docker/docker-compose.yml up -d
+```
+
+### Start Airflow
+
+```bash
+docker compose -f docker/airflow/docker-compose.yml up --build
 ```
 
 ### Run Tests
