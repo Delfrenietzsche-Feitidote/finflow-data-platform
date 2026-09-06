@@ -1,4 +1,5 @@
 from datetime import date
+
 from finflow.ingestion.loaders.bigquery_writer import (
     write_transactions_to_bigquery,
 )
@@ -19,85 +20,106 @@ def run_ingestion(
     count: int = 10,
     start_id: int = 1,
     batch_date: date | None = None,
-) -> int:
+) -> dict:
     logger.info("Ingestion started")
 
-    transactions = generate_transactions(
-    count,
-    start_id=start_id,
-    batch_date=batch_date,
-)
+    database_written = 0
+    bigquery_written = 0
 
-    logger.info("Transactions extracted: %s", len(transactions))
-
-    valid_transactions, rejected_transactions = validate_transactions(
-        transactions
-    )
-
-    logger.info(
-        "Validation completed | valid=%s | rejected=%s",
-        len(valid_transactions),
-        len(rejected_transactions),
-    )
-
-    batch_date = batch_date or settings.pipeline.batch_date
-    raw_path = settings.storage.raw_path
-    rejected_path = settings.storage.rejected_path
-
-    write_raw_transactions(
-        valid_transactions,
-        f"{raw_path}transactions/{batch_date}/transactions.json",
-    )
-
-    logger.info("Raw transactions written: %s", len(valid_transactions))
-
-    inserted_transaction_ids = write_transactions(
-        valid_transactions,
-    )
-
-    database_written = len(inserted_transaction_ids)
-
-    logger.info(
-        "Database transactions written: %s",
-        database_written,
-    )
-
-    inserted_transaction_id_set = set(inserted_transaction_ids)
-
-    new_transactions = [
-        transaction
-        for transaction in valid_transactions
-        if transaction.transaction_id in inserted_transaction_id_set
-    ]
-
-    bigquery_written = write_transactions_to_bigquery(
-        new_transactions,
-    )
-
-    logger.info(
-        "BigQuery transactions written: %s",
-        bigquery_written,
-    )
-
-    if rejected_transactions:
-        write_rejected_transactions(
-            rejected_transactions,
-            f"{rejected_path}transactions/{batch_date}/rejected.json",
+    try:
+        transactions = generate_transactions(
+            count,
+            start_id=start_id,
+            batch_date=batch_date,
         )
 
-        logger.warning(
-            "Rejected transactions written: %s",
+        logger.info("Transactions extracted: %s", len(transactions))
+
+        valid_transactions, rejected_transactions = validate_transactions(
+            transactions
+        )
+
+        logger.info(
+            "Validation completed | valid=%s | rejected=%s",
+            len(valid_transactions),
             len(rejected_transactions),
         )
 
-    logger.info(
-        "Ingestion completed | batch_date=%s | database_written=%s | bigquery_written=%s",
-        batch_date,
-        database_written,
-        bigquery_written,
-    )
+        batch_date = batch_date or settings.pipeline.batch_date
+        raw_path = settings.storage.raw_path
+        rejected_path = settings.storage.rejected_path
 
-    return {
-        "database_written": database_written,
-        "bigquery_written": bigquery_written,
-    }
+        write_raw_transactions(
+            valid_transactions,
+            f"{raw_path}transactions/{batch_date}/transactions.json",
+        )
+
+        logger.info(
+            "Raw transactions written: %s",
+            len(valid_transactions),
+        )
+
+        inserted_transaction_ids = write_transactions(
+            valid_transactions,
+        )
+
+        database_written = len(inserted_transaction_ids)
+
+        logger.info(
+            "Database transactions written: %s",
+            database_written,
+        )
+
+        inserted_transaction_id_set = set(inserted_transaction_ids)
+
+        new_transactions = [
+            transaction
+            for transaction in valid_transactions
+            if transaction.transaction_id in inserted_transaction_id_set
+        ]
+
+        bigquery_written = write_transactions_to_bigquery(
+            new_transactions,
+        )
+
+        logger.info(
+            "BigQuery transactions written: %s",
+            bigquery_written,
+        )
+
+        if rejected_transactions:
+            write_rejected_transactions(
+                rejected_transactions,
+                f"{rejected_path}transactions/{batch_date}/rejected.json",
+            )
+
+            logger.warning(
+                "Rejected transactions written: %s",
+                len(rejected_transactions),
+            )
+
+        logger.info(
+            "Ingestion completed | batch_date=%s | database_written=%s | bigquery_written=%s",
+            batch_date,
+            database_written,
+            bigquery_written,
+        )
+
+        return {
+            "status": "success",
+            "database_written": database_written,
+            "bigquery_written": bigquery_written,
+        }
+
+    except Exception:
+        logger.exception(
+            "Ingestion failed | database_written=%s | bigquery_written=%s",
+            database_written,
+            bigquery_written,
+        )
+
+        return {
+            "status": "failed",
+            "database_written": database_written,
+            "bigquery_written": bigquery_written,
+        }
