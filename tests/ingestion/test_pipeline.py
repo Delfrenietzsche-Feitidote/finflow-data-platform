@@ -219,4 +219,76 @@ def test_run_ingestion_only_sends_new_transactions_to_bigquery(
 
     assert len(bigquery_transactions) == 1
     assert bigquery_transactions[0].transaction_id == "TX001"
-    
+
+def test_run_ingestion_handles_database_failure(
+    tmp_path,
+    monkeypatch,
+):
+    raw_path = tmp_path / "raw"
+    rejected_path = tmp_path / "rejected"
+
+    monkeypatch.setattr(
+        settings.storage,
+        "raw_path",
+        f"{raw_path}/",
+    )
+
+    monkeypatch.setattr(
+        settings.storage,
+        "rejected_path",
+        f"{rejected_path}/",
+    )
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions",
+        lambda transactions: (_ for _ in ()).throw(
+            RuntimeError("database unavailable")
+        ),
+    )
+
+    result = run_ingestion(2)
+
+    assert result["status"] == "failed"
+    assert result["database_written"] == 0
+    assert result["bigquery_written"] == 0
+
+
+def test_run_ingestion_handles_bigquery_failure(
+    tmp_path,
+    monkeypatch,
+):
+    raw_path = tmp_path / "raw"
+    rejected_path = tmp_path / "rejected"
+
+    monkeypatch.setattr(
+        settings.storage,
+        "raw_path",
+        f"{raw_path}/",
+    )
+
+    monkeypatch.setattr(
+        settings.storage,
+        "rejected_path",
+        f"{rejected_path}/",
+    )
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions",
+        lambda transactions: [
+            transaction.transaction_id
+            for transaction in transactions
+        ],
+    )
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions_to_bigquery",
+        lambda transactions: (_ for _ in ()).throw(
+            RuntimeError("bigquery unavailable")
+        ),
+    )
+
+    result = run_ingestion(2)
+
+    assert result["status"] == "failed"
+    assert result["database_written"] == 2
+    assert result["bigquery_written"] == 0
