@@ -68,7 +68,7 @@ It demonstrates how I approach Data Engineering from both sides:
 
 ## Project Status
 
-**Current Sprint: Sprint 8.6 — Final Portfolio Polish**
+**Project Status: Portfolio Release Complete**
 
 | Sprint     | Area                         | Status         |
 | ---------- | ---------------------------- | -------------- |
@@ -85,7 +85,7 @@ It demonstrates how I approach Data Engineering from both sides:
 | Sprint 8.3 | Production Reliability       | ✅ Complete     |
 | Sprint 8.4 | CI/CD Improvements           | ✅ Complete     |
 | Sprint 8.5 | Architecture & Documentation | ✅ Complete     |
-| Sprint 8.6 | Final Portfolio Polish       | 🚧 In Progress  |
+| Sprint 8.6 | Final Portfolio Polish       | ✅ Complete     |
 
 ---
 
@@ -258,6 +258,48 @@ Validation includes checks such as:
 * Transaction fee greater than or equal to zero
 * Transaction fee not exceeding transaction amount
 * Exchange rate greater than zero
+
+### Example Pipeline Walkthrough
+
+A typical FinFlow ingestion run processes a batch through the following lifecycle:
+
+1. **Generate / receive transactions** — the ingestion layer receives a batch of financial transaction records.
+2. **Validate records** — transaction identifiers, accounts, currencies, payment methods, amounts, fees, and exchange rates are validated.
+3. **Separate invalid records** — malformed transactions are rejected before reaching downstream systems.
+4. **Stage in PostgreSQL** — valid transactions are written to PostgreSQL, where existing transaction IDs are ignored.
+5. **Detect new transactions** — PostgreSQL returns the IDs that were actually inserted, allowing the pipeline to identify the incremental batch.
+6. **Load BigQuery** — only newly inserted transactions are sent to BigQuery. Deterministic job IDs help protect retried loads from duplicate jobs.
+7. **Transform with dbt** — warehouse data is transformed into analytics-ready datasets.
+8. **Serve analytics** — trusted transformed data becomes available for analytical and future machine-learning workloads.
+
+```text
+Transaction Batch
+       │
+       ▼
+   Validation
+       │
+       ├── Invalid ──→ Reject
+       │
+       ▼
+PostgreSQL Staging
+       │
+       ▼
+New IDs Returned
+       │
+       ▼
+Incremental Batch
+       │
+       ▼
+    BigQuery
+       │
+       ▼
+      dbt
+       │
+       ▼
+Analytics / BI
+```
+
+If an external PostgreSQL or BigQuery write fails transiently, FinFlow retries the operation using exponential backoff. Pipeline execution and write counts are recorded through structured logging, providing visibility into successful and failed runs.
 
 ---
 
@@ -614,7 +656,7 @@ Sprint 8 focuses on production readiness and portfolio presentation. Core engine
 * [x] Final documentation review
 * [x] Repository cleanup
 * [x] Portfolio presentation improvements
-* [ ] Example pipeline walkthrough
+* [x] Example pipeline walkthrough
 * [x] Final architecture review
 * [x] Production-readiness summary
 
