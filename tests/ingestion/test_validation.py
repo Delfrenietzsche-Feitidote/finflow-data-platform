@@ -53,3 +53,19 @@ def test_invalid_exchange_rate_is_rejected():
     errors = validate_transaction(transaction)
 
     assert "exchange_rate must be greater than 0" in errors
+
+def test_empty_account_id_is_rejected():
+    transaction = create_transaction()
+    transaction.account_id = "   "
+
+    errors = validate_transaction(transaction)
+
+    assert "account_id is empty" in errors
+
+
+def test_fee_exceeding_amount_is_rejected():
+    transaction = create_transaction(amount="100.00", fee="150.00")
+
+    errors = validate_transaction(transaction)
+
+    assert "transaction_fee cannot exceed transaction_amount" in errors

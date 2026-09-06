@@ -22,6 +22,16 @@ def test_run_ingestion(tmp_path, monkeypatch):
         f"{rejected_path}/",
     )
 
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions",
+        lambda transactions: len(list(transactions)),
+    )
+
+    monkeypatch.setattr(
+        "finflow.ingestion.pipeline.write_transactions_to_bigquery",
+        lambda transactions: len(list(transactions)),
+    )
+
     run_ingestion(10)
 
     output_file = (
