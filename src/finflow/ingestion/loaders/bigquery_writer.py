@@ -1,3 +1,4 @@
+import hashlib
 import os
 from collections.abc import Iterable
 from datetime import datetime, timezone
@@ -11,10 +12,31 @@ DATASET_ID = "raw"
 TABLE_ID = "transactions"
 
 
+def _build_job_id(transactions: list[TransactionRecord]) -> str:
+    batch_key = "|".join(
+        transaction.model_dump_json()
+        for transaction in sorted(
+            transactions,
+            key=lambda transaction: transaction.transaction_id,
+        )
+    )
+
+    digest = hashlib.sha256(
+        batch_key.encode("utf-8")
+    ).hexdigest()[:32]
+
+    return f"finflow_transactions_{digest}"
+
+
 def write_transactions_to_bigquery(
     transactions: Iterable[TransactionRecord],
 ) -> int:
     project_id = os.environ["FINFLOW_GCP_PROJECT_ID"]
+
+    transactions = list(transactions)
+
+    if not transactions:
+        return 0
 
     ingested_at = datetime.now(timezone.utc).isoformat()
 
@@ -24,9 +46,6 @@ def write_transactions_to_bigquery(
         record = transaction.model_dump(mode="json")
         record["created_at"] = ingested_at
         records.append(record)
-
-    if not records:
-        return 0
 
     client = bigquery.Client(project=project_id)
 
@@ -40,6 +59,7 @@ def write_transactions_to_bigquery(
         records,
         table_ref,
         job_config=job_config,
+        job_id=_build_job_id(transactions),
     )
 
     job.result()
