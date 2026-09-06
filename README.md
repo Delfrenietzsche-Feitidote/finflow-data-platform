@@ -8,9 +8,67 @@ The project focuses on production-oriented engineering practices including **dat
 
 ---
 
+## Portfolio Showcase
+
+> **FinFlow demonstrates production-oriented Data Engineering — not just data movement.**
+
+### What I Built
+
+An end-to-end financial data platform that ingests, validates, stages, incrementally processes, transforms, and serves transaction data for analytics.
+
+    Financial Transactions
+            │
+            ▼
+     Python Ingestion
+            │
+            ▼
+     Data Validation
+            │
+            ▼
+     PostgreSQL Staging
+            │
+            ▼
+     Incremental Detection
+            │
+            ▼
+     Apache Airflow
+            │
+            ▼
+     BigQuery
+            │
+            ▼
+     dbt Transformations
+            │
+            ▼
+     Analytics / BI
+
+### Engineering Highlights
+
+| Capability | Implementation |
+|------------|----------------|
+| **Data Quality** | Validation rules prevent malformed financial transactions from reaching downstream systems |
+| **Incremental Processing** | Only newly inserted transactions are sent downstream |
+| **Idempotency** | Duplicate transaction IDs are prevented during staging and BigQuery jobs use deterministic identifiers |
+| **Reliability** | External writes use retry handling with exponential backoff |
+| **Orchestration** | Apache Airflow manages pipeline execution |
+| **Warehouse** | BigQuery provides analytical storage |
+| **Transformation** | dbt manages SQL-based warehouse transformations |
+| **Testing** | 57 automated tests covering pipeline and reliability behavior |
+| **CI/CD** | GitHub Actions runs Ruff, pytest, PostgreSQL integration, and Docker validation |
+
+### Why It Stands Out
+
+FinFlow goes beyond a basic ETL project by treating **reliability, data quality, incremental processing, observability, testing, and CI/CD as first-class engineering concerns**.
+
+It demonstrates how I approach Data Engineering from both sides:
+
+**Build the pipeline → make it reliable → make it testable → make it maintainable.**
+
+---
+
 ## Project Status
 
-**Current Sprint: Sprint 8 — Production Readiness**
+**Current Sprint: Sprint 8.6 — Final Portfolio Polish**
 
 | Sprint     | Area                         | Status         |
 | ---------- | ---------------------------- | -------------- |
@@ -543,24 +601,22 @@ Additional documentation is maintained under the `docs/` directory.
 
 ## 16. Roadmap
 
-The next stage focuses on final portfolio and production-readiness improvements.
+Sprint 8 focuses on production readiness and portfolio presentation. Core engineering, architecture documentation, repository cleanup, and final validation are complete; the remaining work is the final portfolio wrap-up.
 
 ### Sprint 8.5 — Architecture & Documentation
 
 * [x] System architecture documentation
-* [ ] README portfolio upgrade
-* [ ] Architecture consistency review
+* [x] README portfolio upgrade
+* [x] Architecture consistency review
 
 ### Sprint 8.6 — Final Portfolio Polish
 
-Planned improvements include:
-
-* Final documentation review
-* Repository cleanup
-* Portfolio presentation improvements
-* Example pipeline walkthrough
-* Final architecture review
-* Production-readiness summary
+* [x] Final documentation review
+* [x] Repository cleanup
+* [x] Portfolio presentation improvements
+* [ ] Example pipeline walkthrough
+* [x] Final architecture review
+* [x] Production-readiness summary
 
 ---
 
