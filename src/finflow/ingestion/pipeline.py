@@ -1,15 +1,16 @@
 from datetime import date
 
+from finflow.common.config import settings
+from finflow.common.logging import get_logger
+from finflow.common.retry import retry
+from finflow.database.writer import write_transactions
 from finflow.ingestion.loaders.bigquery_writer import (
     write_transactions_to_bigquery,
 )
-from finflow.common.config import settings
-from finflow.common.logging import get_logger
 from finflow.ingestion.loaders.raw_writer import write_raw_transactions
 from finflow.ingestion.loaders.rejected_writer import write_rejected_transactions
 from finflow.ingestion.sources.transactions import generate_transactions
 from finflow.ingestion.validators.batch import validate_transactions
-from finflow.database.writer import write_transactions
 from finflow.quality.transactions import validate_staging_transactions
 
 
@@ -59,8 +60,8 @@ def run_ingestion(
             len(valid_transactions),
         )
 
-        inserted_transaction_ids = write_transactions(
-            valid_transactions,
+        inserted_transaction_ids = retry(
+            lambda: write_transactions(valid_transactions),
         )
 
         database_written = len(inserted_transaction_ids)
@@ -78,8 +79,8 @@ def run_ingestion(
             if transaction.transaction_id in inserted_transaction_id_set
         ]
 
-        bigquery_written = write_transactions_to_bigquery(
-            new_transactions,
+        bigquery_written = retry(
+            lambda: write_transactions_to_bigquery(new_transactions),
         )
 
         logger.info(
