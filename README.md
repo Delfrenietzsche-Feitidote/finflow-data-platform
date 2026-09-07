@@ -89,6 +89,12 @@ It demonstrates how I approach Data Engineering from both sides:
 
 ---
 
+## Architecture
+
+![FinFlow Data Platform Architecture](docs/diagrams/finflow-architecture.png)
+
+FinFlow implements an end-to-end batch data pipeline covering ingestion, validation, staging, incremental processing, orchestration, warehousing, transformation, and analytics.
+
 ## 1. Overview
 
 FinFlow simulates a financial data platform that processes transaction data from multiple operational sources and prepares trusted datasets for analytical workloads.
